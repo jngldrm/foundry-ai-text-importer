@@ -1,7 +1,6 @@
 import { PromptTemplate } from '@langchain/core/prompts';
 import OpenAILLM from './openaillm';
 import { StructuredOutputParser } from '@langchain/core/output_parsers';
-import { LLMChain } from 'langchain/chains';
 import { ZodSchema } from 'zod';
 
 async function askLLM<TInput, TOutput>(
@@ -25,16 +24,13 @@ async function askLLM<TInput, TOutput>(
 
   const outputParser: any = StructuredOutputParser.fromZodSchema(outputSchema as any);
 
-  const output = (
-    await new LLMChain({
-      llm,
-      prompt,
-      outputParser,
-    }).invoke({
-      formatInstructions: outputParser.getFormatInstructions(),
-      ...inputOptions,
-    })
-  ).text;
+  // Use modern LCEL syntax instead of deprecated LLMChain
+  const chain = prompt.pipe(llm).pipe(outputParser);
+  
+  const output = await chain.invoke({
+    formatInstructions: outputParser.getFormatInstructions(),
+    ...inputOptions,
+  });
 
   // This does not support nested overrides, will need to implement when necessary
   // Apply field overrides before casting
