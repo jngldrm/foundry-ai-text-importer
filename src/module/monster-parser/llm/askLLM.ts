@@ -23,7 +23,7 @@ async function askLLM<TInput, TOutput>(
   {formatInstructions}
   `);
 
-  const outputParser = StructuredOutputParser.fromZodSchema(outputSchema);
+  const outputParser: any = StructuredOutputParser.fromZodSchema(outputSchema as any);
 
   const output = (
     await new LLMChain({
