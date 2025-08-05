@@ -1,0 +1,19 @@
+<h2>OpenAI Secret API Key</h2>
+<p>Enter your OpenAI Secret API key here! You can get one from the <a href="https://beta.openai.com/signup/">OpenAI
+    website</a>.</p>
+
+<div class="form-description">
+  <form id="openai-api-key-form" autocomplete="off" onsubmit="event.preventDefault();">
+    <label for="openai-api-key">OpenAI Secret API Key</label>
+    <input type="password" id="apiKey" name="apiKey" value="{{apiKey}}" />
+    <button type="submit">Save and Validate</button>
+    {{#if apiKeyIsValid}}
+    <p class="success-message">Your API key is valid!</p>
+    {{else if apiKeyHasNoModelAccess}}
+    <p class="error-message">Your OpenAI API Key does not have access to GPT-4, which is currently necessary for this
+      importer to work.</p>
+    {{else if apiKeyIsInvalid}}
+    <p class="error-message">Invalid Key provided</p>
+    {{/if}}
+  </form>
+</div>

@@ -1,0 +1,27 @@
+{
+  "LLMTCI": {
+    "ActorsDirectoryButton": "AI Monster Importer",
+    "MonsterFormTitle": "AI Monster Importer",
+    "DefaultMonsterCompendiumLabel": "AI Importer Monsters",
+    "CompendiumSelectorLabel": "Compendium",
+    "UpdateAPIKeyButton": "Update API Key",
+    "ModelSelectorLabel": "Model",
+    "MonsterFormLoadingText": "Loading...",
+    "MonsterFormInvalidAPIKeyMessage": "Your OpenAI API Key is invalid! Click below to update it",
+    "MonsterStatBlockLabel": "Monster Stat Block",
+    "MonsterStatBlockSubmitButton": "Submit",
+    "OpenAIAPIKeySubmenuButtonLabel": "OpenAI API Key",
+    "OpenAIAPIKeySubmenuButtonHint": "Your Secret API Key for Open AI (stored locally)",
+    "CompendiumImportDestinationSettingLabel": "Compendium Import Destination",
+    "CompendiumImportDestinationSettingHint": "The compendium your monsters will be imported to",
+    "OpenAIModelSettingLabel": "OpenAI Model",
+    "OpenAIModelSettingHint": "The OpenAI model to use (highly recommended: gpt-4-turbo-preview or gpt-4)",
+    "APIKeySubmenuTitle": "OpenAI Secret API Key",
+    "APIKeySubmenuDescription": "Enter your OpenAI Secret API key here! You can get one from the ",
+    "APIKeySubmenuDescriptionLink": "OpenAI website",
+    "OpenAISecretAPIKeyEntryLabel": "OpenAI Secret API Key",
+    "APIKeyIsValidMessage": "Your API key is valid!",
+    "APIKeyIsInvalidMessage": "Invalid Key provided",
+    "SaveAndValidateAPIKeyButton": "Save and Validate"
+  }
+}

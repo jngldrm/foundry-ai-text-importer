@@ -1,0 +1,134 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  node_version: 19
+
+jobs:
+  build:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      # Install node
+      - name: install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.node_version }}
+      # Cache modules
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: .npm
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+
+      - run: npm ci --cache .npm --prefer-offline
+
+      - run: npm run build
+
+      # TODO - can we combine these steps?
+      # Get the version from built 'module.json'
+      - name: Get Version
+        shell: bash
+        id: get-version
+        run: echo "::set-output name=version::$(node ./.github/workflows/get-version.js)"
+
+      - name: Get Foundry Compatibility
+        shell: bash
+        id: get-foundry-compatibility
+        run: |
+          # Use jq to extract multiple values from the JSON file
+          MIN_FOUNDRY_COMPATIBILITY=$(jq -r '.compatibility.minimum' ./dist/module.json)
+          MAX_FOUNDRY_COMPATIBILITY=$(jq -r '.compatibility.maximum' ./dist/module.json)
+          VERIFIED_FOUNDRY_COMPATIBILITY=$(jq -r '.compatibility.verified' ./dist/module.json)
+
+          echo $MIN_FOUNDRY_COMPATIBILITY
+          echo $MAX_FOUNDRY_COMPATIBILITY
+          echo $VERIFIED_FOUNDRY_COMPATIBILITY
+          echo "Printed Compatibilities"
+          
+          # Set each value as an output variable
+          echo "::set-output name=minFoundryCompatibility::$MIN_FOUNDRY_COMPATIBILITY"
+          echo "::set-output name=maxFoundryCompatibility::$MAX_FOUNDRY_COMPATIBILITY"
+          echo "::set-output name=verifiedFoundryCompatibility::$VERIFIED_FOUNDRY_COMPATIBILITY"
+
+      # Useful only for the template so we can leave the manifest and download urls empty
+      - name: Substitute Manifest and Download Links For Versioned Ones
+        id: sub_manifest_link_latest
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: './dist/module.json'
+        env:
+          url: https://github.com/${{github.repository}}
+          manifest: https://github.com/${{github.repository}}/releases/latest/download/module.json
+          download: https://github.com/${{github.repository}}/releases/latest/download/module.zip
+
+      # Create a zip file with all files required by the module to add to the release
+      - name: Zip Latest Release
+        working-directory: ./dist
+        run: zip -r ../module.zip ./*
+
+      # Update the 'latest' release
+      - name: Update Latest Release
+        id: create_latest_release
+        uses: ncipollo/release-action@v1
+        if: endsWith(github.ref, 'main')
+        with:
+          allowUpdates: true
+          name: Latest
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: './dist/module.json, ./module.zip'
+          tag: latest
+      
+      # Substitute the Manifest and Download URLs in the module.json
+      - name: Substitute Manifest and Download Links For Versioned Ones
+        id: sub_manifest_link_version
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: './dist/module.json'
+        env:
+          url: https://github.com/${{github.repository}}
+          manifest: https://github.com/${{github.repository}}/releases/latest/download/module.json
+          download: https://github.com/${{github.repository}}/releases/download/${{steps.get-version.outputs.version}}/module.zip
+      
+      # Create a zip file with all files required by the module to add to the release
+      - name: Zip Version Release
+        working-directory: ./dist
+        run: zip -r ../module.zip ./*
+
+      # Create a release for this specific version
+      - name: Create Github Version Release
+        id: create_version_release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: false # set this to false if you want to prevent updating existing releases
+          name: Release ${{ steps.get-version.outputs.version }}
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: './dist/module.json,./module.zip'
+          tag: ${{ steps.get-version.outputs.version }}
+
+      # The Foundry VTT release process is a separate one from the GitHub release process
+      # This step will only run when the previous one succeeds, publishing to foundry immediately after a new version is created on github
+      - name: Create Foundry Release
+        run: node ./.github/workflows/create-foundry-release.js
+        env:
+          foundryPackageReleaseAuthToken: ${{ secrets.FVTT_PACKAGE_RELEASE_AUTH_TOKEN }}
+          moduleVersion: ${{ steps.get-version.outputs.version }}
+          notesUrl: https://github.com/wickercar/foundry-ai-text-importer/releases/tag/${{ steps.get-version.outputs.version }}
+          url: https://github.com/${{github.repository}}
+          manifestUrl: https://raw.githubusercontent.com/wickercar/foundry-ai-text-importer/${{steps.get-version.outputs.version}}/src/module.json
+          minimumCompatibility: ${{ steps.get-foundry-compatibility.outputs.minFoundryCompatibility }}
+          maximumCompatibility: ${{ steps.get-foundry-compatibility.outputs.maxFoundryCompatibility }}
+          verifiedCompatibility: ${{ steps.get-foundry-compatibility.outputs.verifiedFoundryCompatibility }}

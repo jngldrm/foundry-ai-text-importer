@@ -1,0 +1,26 @@
+# IDE
+.idea/
+.vs/
+.vscode/
+
+# Node Modules
+node_modules/
+npm-debug.log
+
+# Local configuration
+foundryconfig.json
+
+# Distribution files
+dist
+
+# ESLint
+.eslintcache
+
+# Junit results
+junit.xml
+**/*.snap
+
+# Test coverage
+tests/coverage/
+
+foundryconfig.json

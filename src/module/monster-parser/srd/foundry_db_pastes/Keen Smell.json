@@ -1,0 +1,88 @@
+{
+    "_id": "EsvdwAvnKR0SGP6R",
+    "name": "Keen Smell",
+    "type": "feat",
+    "img": "icons/creatures/mammals/wolf-howl-moon-forest-blue.webp",
+    "system": {
+        "description": {
+            "value": "<p>The swarm has<strong> advantage </strong>on Wisdom (Perception) checks that rely on smell.</p>",
+            "chat": "",
+            "unidentified": ""
+        },
+        "source": "SRD 5.1",
+        "activation": {
+            "type": "",
+            "cost": null,
+            "condition": ""
+        },
+        "duration": {
+            "value": "",
+            "units": ""
+        },
+        "cover": null,
+        "target": {
+            "value": null,
+            "width": null,
+            "units": "",
+            "type": ""
+        },
+        "range": {
+            "value": null,
+            "long": null,
+            "units": ""
+        },
+        "uses": {
+            "value": null,
+            "max": "",
+            "per": null,
+            "recovery": ""
+        },
+        "consume": {
+            "type": "",
+            "target": null,
+            "amount": null
+        },
+        "ability": "",
+        "actionType": "",
+        "attackBonus": "",
+        "chatFlavor": "",
+        "critical": {
+            "threshold": null,
+            "damage": ""
+        },
+        "damage": {
+            "parts": [],
+            "versatile": ""
+        },
+        "formula": "",
+        "save": {
+            "ability": "",
+            "dc": null,
+            "scaling": "spell"
+        },
+        "type": {
+            "value": "",
+            "subtype": ""
+        },
+        "requirements": "",
+        "recharge": {
+            "value": null,
+            "charged": false
+        }
+    },
+    "effects": [],
+    "folder": null,
+    "sort": 0,
+    "ownership": {
+        "default": 0
+    },
+    "flags": {},
+    "_stats": {
+        "systemId": null,
+        "systemVersion": null,
+        "coreVersion": null,
+        "createdTime": null,
+        "modifiedTime": null,
+        "lastModifiedBy": null
+    }
+}

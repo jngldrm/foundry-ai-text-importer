@@ -1,0 +1,66 @@
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 120px;
+  height: 21px;
+  background:
+    linear-gradient(#000 0 0) left/10px 100% no-repeat #ddd;
+  animation: l6 1s infinite cubic-bezier(0, 0.2, 1, 1);
+  position: relative;
+}
+
+.loader:before,
+.loader:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 7px;
+  background:
+    linear-gradient(#000 0 0) left/10px 100% no-repeat #ddd;
+  animation: inherit;
+}
+
+.loader:before {
+  top: 0;
+  animation-timing-function: cubic-bezier(0, 0, 1, 1);
+}
+
+.loader:after {
+  bottom: 0;
+  animation-timing-function: cubic-bezier(0, 0.4, 1, 1);
+}
+
+@keyframes l6 {
+  50% {
+    background-position: right
+  }
+}
+
+.timeElapsedStringComplete {
+  color: green;
+}
+
+.timeElapsedStringLoading {
+  color: blue;
+}
+
+.timeElapsedStringError {
+  color: red;
+}
+
+.timeElapsedStringComplete,
+.timeElapsedStringLoading,
+.timeElapsedStringError {
+  font-size: 1.2em;
+  font-style: bold;
+  margin-top: 0.5em;
+  margin-left: 0.5em;
+  display: flex;
+}
+
+.errorMessage {
+  font-size: 0.8em;
+  font-style: bold;
+  margin-top: 0.5em;
+  display: flex;
+}
