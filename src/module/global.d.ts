@@ -2,7 +2,7 @@ import 'fvtt-types';
 
 declare global {
   interface LenientGlobalVariableTypes {
-    game: never; // the type doesn't matter
+    game: any; // the type doesn't matter
     dnd5e: never;
   }
 

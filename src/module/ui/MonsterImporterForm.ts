@@ -1,4 +1,4 @@
-import { OpenAI } from 'langchain/llms/openai';
+import { OpenAI } from '@langchain/openai';
 import genFoundry5eMonsterActorFromTextBlock from '../genFoundryActorFromMonsterTextBlock';
 import OpenAIAPIKeyStorage, {
   APIKeyValidationStatus,
@@ -89,7 +89,7 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
   };
 
   static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, this.DEFAULT_OPTIONS);
+    return (foundry.utils as any).mergeObject(super.DEFAULT_OPTIONS, this.DEFAULT_OPTIONS);
   }
 
   startLoad() {
@@ -113,16 +113,16 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
     return renderTemplate(template, context);
   }
 
-  _onRender(context, options) {
+  async _onRender(context, options) {
     // ApplicationV2 equivalent of activateListeners
-    super._onRender(context, options);
+    await super._onRender(context, options);
     
     const html = this.element;
     
     // Submit button handler
     html.querySelector('#llmtci-submit')?.addEventListener('click', async (event) => {
       event.preventDefault();
-      const userText = html.querySelector('#llmtci-userText')?.value as string;
+      const userText = (html.querySelector('#llmtci-userText') as HTMLInputElement)?.value as string;
       this.userText = userText;
       this.startLoad();
       // main text block parsing function
@@ -140,7 +140,7 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
     html.querySelector('#llmtci-compendiumSelect')?.addEventListener('change', async (event) => {
       event.preventDefault();
       const selectedCompendiumName = (event.target as HTMLSelectElement).value;
-      game.settings.set('llm-text-content-importer', 'compendiumImportDestination', selectedCompendiumName);
+      (game as any).settings.set('llm-text-content-importer', 'compendiumImportDestination', selectedCompendiumName);
     });
     
     // Model selector (if enabled)
@@ -148,7 +148,7 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
       html.querySelector('#llmtci-modelSelect')?.addEventListener('change', async (event) => {
         event.preventDefault();
         const selectedModelId = (event.target as HTMLSelectElement).value;
-        game.settings.set('llm-text-content-importer', 'openaiModel', selectedModelId);
+        (game as any).settings.set('llm-text-content-importer', 'openaiModel', selectedModelId);
       });
     }
     
@@ -175,7 +175,7 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
   async genActorCompendiumOptions(): Promise<DropdownOption[]> {
     const actorCompendia = await foundryMonsterCompendia.getAllActorCompendia();
     // Compendium options
-    const selectedCompendiumName = game.settings.get('llm-text-content-importer', 'compendiumImportDestination');
+    const selectedCompendiumName = (game as any).settings.get('llm-text-content-importer', 'compendiumImportDestination');
     return actorCompendia.map((compendium) => {
       return {
         name: compendium.metadata.name,
@@ -187,7 +187,7 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
 
   async genModelOptions(): Promise<DropdownOption[]> {
     const gptModels = await fetchGPTModels();
-    const selectedModelId = game.settings.get('llm-text-content-importer', 'openaiModel');
+    const selectedModelId = (game as any).settings.get('llm-text-content-importer', 'openaiModel');
     return gptModels.map((model) => {
       return {
         name: model.id,
@@ -224,7 +224,7 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
     
     return {
       ...context,
-      title: game.i18n.localize('LLMTCI.MonsterFormTitle'),
+      title: (game as any).i18n.localize('LLMTCI.MonsterFormTitle'),
       apiKeyIsInvalid: this.apiKeyValidationStatus === 'INVALID_KEY',
       apiKeyHasNoModelAccess: this.apiKeyValidationStatus === 'NO_MODEL_ACCESS',
       isLoading: this.isLoading,

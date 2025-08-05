@@ -126,9 +126,9 @@ jobs:
         env:
           foundryPackageReleaseAuthToken: ${{ secrets.FVTT_PACKAGE_RELEASE_AUTH_TOKEN }}
           moduleVersion: ${{ steps.get-version.outputs.version }}
-          notesUrl: https://github.com/wickercar/foundry-ai-text-importer/releases/tag/${{ steps.get-version.outputs.version }}
+          notesUrl: https://github.com/${{github.repository}}/releases/tag/${{ steps.get-version.outputs.version }}
           url: https://github.com/${{github.repository}}
-          manifestUrl: https://raw.githubusercontent.com/wickercar/foundry-ai-text-importer/${{steps.get-version.outputs.version}}/src/module.json
+          manifestUrl: https://raw.githubusercontent.com/${{github.repository}}/${{steps.get-version.outputs.version}}/src/module.json
           minimumCompatibility: ${{ steps.get-foundry-compatibility.outputs.minFoundryCompatibility }}
           maximumCompatibility: ${{ steps.get-foundry-compatibility.outputs.maxFoundryCompatibility }}
           verifiedCompatibility: ${{ steps.get-foundry-compatibility.outputs.verifiedFoundryCompatibility }}

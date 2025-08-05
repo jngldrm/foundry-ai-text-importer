@@ -1,4 +1,4 @@
-import { OpenAI } from 'langchain/llms/openai';
+import { OpenAI } from '@langchain/openai';
 import OpenAIAPIKeyStorage from '../settings/openai-api-key/OpenAIAPIKeyStorage';
 import featureFlags from '../../featureFlags';
 

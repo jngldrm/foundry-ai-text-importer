@@ -17,7 +17,7 @@ Hooks.on('renderActorDirectory', () => {
   $('.directory-header .header-actions', $('[data-tab="actors"]'))
     .filter((i, e) => !$(e).has('#llm-text-content-importer-button').length)
     .append(
-      `<button id='llm-text-content-importer-button' data-llm-text-content-importer_start><i class='fas fa-scroll-old'></i>&nbsp;${game.i18n.localize(
+      `<button id='llm-text-content-importer-button' data-llm-text-content-importer_start><i class='fas fa-scroll-old'></i>&nbsp;${(game as any).i18n.localize(
         'LLMTCI.ActorsDirectoryButton',
       )}</button>`,
     );
