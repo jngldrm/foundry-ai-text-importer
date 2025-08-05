@@ -60,4 +60,10 @@ export default class OpenAIAPIKeyForm extends foundry.applications.api.Applicati
     const template = 'modules/llm-text-content-importer/templates/openai_api_key_form.hbs';
     return renderTemplate(template, context);
   }
+
+  async _replaceHTML(result, content, options) {
+    // ApplicationV2 DOM replacement method
+    content.innerHTML = result;
+    return content;
+  }
 }
