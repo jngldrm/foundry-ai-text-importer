@@ -29,7 +29,7 @@ export default class OpenAIAPIKeyForm extends foundry.applications.api.Applicati
   };
 
   static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, this.DEFAULT_OPTIONS);
+    return (foundry.utils as any).mergeObject(super.defaultOptions, this.DEFAULT_OPTIONS);
   }
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
