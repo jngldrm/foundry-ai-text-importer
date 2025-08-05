@@ -65,7 +65,7 @@ const getCompendiumOrCreateIfNotExists = async (compendiumName, compendiumLabel)
         package: 'world',
         path: `world.${compendiumName}`,
         ownership: {
-          default: foundry.CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
+          [foundry.CONST.USER_ROLES.PLAYER]: foundry.CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
           [(game as any).user.id]: foundry.CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
         },
         system: 'dnd5e',
