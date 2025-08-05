@@ -111,7 +111,7 @@ jobs:
         id: create_version_release
         uses: ncipollo/release-action@v1
         with:
-          allowUpdates: false # set this to false if you want to prevent updating existing releases
+          allowUpdates: true # Allow updating existing releases to handle tag conflicts
           name: Release ${{ steps.get-version.outputs.version }}
           draft: false
           prerelease: false
