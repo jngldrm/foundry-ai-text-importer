@@ -54,21 +54,32 @@ const getAllActorCompendia = async () => {
 };
 
 const getCompendiumOrCreateIfNotExists = async (compendiumName, compendiumLabel) => {
-  // Not sure if this is right
   let compendium = await getCompendiumByName(compendiumName);
+  console.log('Checking for existing compendium:', compendiumName, 'Found:', !!compendium);
+  
   if (!compendium) {
-    compendium = await CompendiumCollection.createCompendium(
-      {
-        type: 'Actor',
-        label: compendiumLabel,
-        name: compendiumName,
-        package: 'world',
-        path: `world.${compendiumName}`,
-        system: 'dnd5e',
-      },
-      {},
-    );
-    console.log('created new Compendium: ', compendium);
+    try {
+      compendium = await CompendiumCollection.createCompendium(
+        {
+          type: 'Actor',
+          label: compendiumLabel,
+          name: compendiumName,
+          package: 'world',
+          path: `world.${compendiumName}`,
+          system: 'dnd5e',
+        },
+        {},
+      );
+      console.log('created new Compendium: ', compendium);
+    } catch (error) {
+      console.error('Failed to create compendium:', error);
+      // If creation failed because it already exists, try to get it again
+      compendium = await getCompendiumByName(compendiumName);
+      if (!compendium) {
+        throw error; // Re-throw if we still can't find it
+      }
+      console.log('Found existing compendium after creation failure:', compendium);
+    }
   }
   return compendium;
 };
