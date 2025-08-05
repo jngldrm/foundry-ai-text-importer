@@ -1,6 +1,6 @@
 
 
-const fetch = require('node-fetch');
+// Use built-in fetch (Node.js 18+)
 
 async function createAndPushFoundryRelease() {
 
