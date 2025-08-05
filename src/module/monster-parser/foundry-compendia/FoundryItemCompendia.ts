@@ -5,7 +5,7 @@ import { Foundry5eItem } from '../schemas/foundry/item/Foundry5eItem';
 const findItemWithName = async (name: string): Promise<Foundry5eItem | undefined> => {
   // TODO - foundry-vtt-types has "type" as called "entity", see if this is fixable with global types or version change
   // @ts-ignore (Type for Metadata is incorrect in foundry-vtt-types)
-  const itemPacks = game.packs.filter((p) => p.metadata.type === 'Item');
+  const itemPacks = (game as any).packs.filter((p) => p.metadata.type === 'Item');
   for (const pack of itemPacks) {
     const index = await pack.getIndex();
     for (const entry of index) {
@@ -24,7 +24,7 @@ const findItemWithName = async (name: string): Promise<Foundry5eItem | undefined
 const findAllItemsWithName = async (name: string): Promise<Foundry5eItem[]> => {
   // TODO - foundry-vtt-types has "type" as called "entity", see if this is fixable with global types or version change
   // @ts-ignore (Type for Metadata is incorrect in foundry-vtt-types)
-  const itemPacks = game.packs.filter((p) => p.metadata.type === 'Item');
+  const itemPacks = (game as any).packs.filter((p) => p.metadata.type === 'Item');
   const items = [];
   for (const pack of itemPacks) {
     const index = await pack.getIndex();

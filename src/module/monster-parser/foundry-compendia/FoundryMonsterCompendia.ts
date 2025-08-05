@@ -3,7 +3,7 @@ export const DEFAULT_MONSTER_COMPENDIUM_LABEL = 'AI Importer Monsters';
 export const DEFAULT_MONSTER_COMPENDIUM_NAME = 'ai-importer-monsters';
 
 const getCompendiumByName = async (compendiumName: string, packageType = 'world') => {
-  return await game.packs.get(`${packageType}.${compendiumName}`);
+  return await (game as any).packs.get(`${packageType}.${compendiumName}`);
 };
 
 const ensureDefaultCompendiumExists = async () => {
@@ -16,7 +16,7 @@ const ensureDefaultCompendiumExists = async () => {
 
 const validateAndMaybeResetSelectedCompendium = async () => {
   // handle a compendium having been deleted.
-  const selectedCompendiumName = game.settings.get(
+  const selectedCompendiumName = (game as any).settings.get(
     'llm-text-content-importer',
     'compendiumImportDestination',
   ) as string;
@@ -25,7 +25,7 @@ const validateAndMaybeResetSelectedCompendium = async () => {
     console.error('Selected compendium is not valid, resetting to default');
     // Ensure default compendium exists
     const defaultCompendium = await ensureDefaultCompendiumExists();
-    game.settings.set('llm-text-content-importer', 'compendiumImportDestination', defaultCompendium.metadata.name);
+    (game as any).settings.set('llm-text-content-importer', 'compendiumImportDestination', defaultCompendium.metadata.name);
   }
 };
 
@@ -38,7 +38,7 @@ const saveAIImportedMonsterToCompendium = async (
   let compendiumName, compendiumLabel;
   if (compendiumNameInput === undefined) {
     await validateAndMaybeResetSelectedCompendium();
-    compendiumName = game.settings.get('llm-text-content-importer', 'compendiumImportDestination');
+    compendiumName = (game as any).settings.get('llm-text-content-importer', 'compendiumImportDestination');
   } else {
     compendiumName = compendiumNameInput;
     compendiumLabel = compendiumLabelInput;
@@ -50,7 +50,7 @@ const saveAIImportedMonsterToCompendium = async (
 };
 
 const getAllActorCompendia = async () => {
-  return game.packs.filter((pack) => pack.metadata.type === 'Actor');
+  return (game as any).packs.filter((pack) => pack.metadata.type === 'Actor');
 };
 
 const getCompendiumOrCreateIfNotExists = async (compendiumName, compendiumLabel) => {
@@ -66,7 +66,7 @@ const getCompendiumOrCreateIfNotExists = async (compendiumName, compendiumLabel)
         path: `world.${compendiumName}`,
         ownership: {
           default: foundry.CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
-          [game.user.id]: foundry.CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+          [(game as any).user.id]: foundry.CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
         },
         system: 'dnd5e',
       },
