@@ -27,10 +27,10 @@ async function askLLM<TInput, TOutput>(
   // Use modern LCEL syntax instead of deprecated LLMChain
   const chain = prompt.pipe(llm).pipe(outputParser);
   
-  const output = await chain.invoke({
+  let output = await chain.invoke({
     formatInstructions: outputParser.getFormatInstructions(),
     ...inputOptions,
-  });
+  }) as any;
 
   // This does not support nested overrides, will need to implement when necessary
   // Apply field overrides before casting
