@@ -34,13 +34,13 @@
       "path": "lang/en.json"
     }
   ],
-  "url": "https://github.com/wickercar/foundry-ai-text-importer",
-  "license": "https://github.com/wickercar/foundry-ai-text-importer/blob/main/LICENSE",
-  "readme": "https://github.com/wickercar/foundry-ai-text-importer/blob/main/README.md",
-  "changelog": "https://github.com/wickercar/foundry-ai-text-importer/blob/main/docs/CHANGELOG.md",
-  "bugs": "https://github.com/wickercar/foundry-ai-text-importer/issues",
-  "manifest": "https://github.com/wickercar/foundry-ai-text-importer/releases/latest/download/module.json",
-  "download": "https://github.com/wickercar/foundry-ai-text-importer/releases/latest/download/module.zip",
+  "url": "https://github.com/jngldrm/foundry-ai-text-importer",
+  "license": "https://github.com/jngldrm/foundry-ai-text-importer/blob/main/LICENSE",
+  "readme": "https://github.com/jngldrm/foundry-ai-text-importer/blob/main/README.md",
+  "changelog": "https://github.com/jngldrm/foundry-ai-text-importer/blob/main/docs/CHANGELOG.md",
+  "bugs": "https://github.com/jngldrm/foundry-ai-text-importer/issues",
+  "manifest": "https://github.com/jngldrm/foundry-ai-text-importer/releases/latest/download/module.json",
+  "download": "https://github.com/jngldrm/foundry-ai-text-importer/releases/latest/download/module.zip",
   "flags": {
     "allowBugReporter": true
   },
