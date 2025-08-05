@@ -113,6 +113,12 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
     return renderTemplate(template, context);
   }
 
+  async _replaceHTML(result, content, options) {
+    // ApplicationV2 DOM replacement method
+    content.innerHTML = result;
+    return content;
+  }
+
   async _onRender(context, options) {
     // ApplicationV2 equivalent of activateListeners
     await super._onRender(context, options);
