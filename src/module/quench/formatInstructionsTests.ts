@@ -6,7 +6,7 @@ const registerFormatInstructionsTests = (context) => {
   const { describe, it, assert } = context;
   describe('Testing the format instructions', function () {
     it('Generates an output parser for the initial call and prints the format instructions for examination', async function () {
-      const outputParser = StructuredOutputParser.fromZodSchema(Parsed5eLLMMonsterSchema);
+      const outputParser: any = StructuredOutputParser.fromZodSchema(Parsed5eLLMMonsterSchema as any);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore this parameter exists
       const formatInstructions = outputParser.getFormatInstructions();
