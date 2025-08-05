@@ -1,4 +1,4 @@
-import { StructuredOutputParser } from 'langchain/output_parsers';
+import { StructuredOutputParser } from '@langchain/core/output_parsers';
 import { Parsed5eLLMMonsterSchema } from '../monster-parser/schemas/parsed-input-data/monster/Parsed5eMonster';
 
 /* eslint-disable jest/no-export, jest/expect-expect  */

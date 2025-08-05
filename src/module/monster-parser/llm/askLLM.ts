@@ -1,6 +1,6 @@
-import { PromptTemplate } from 'langchain/prompts';
+import { PromptTemplate } from '@langchain/core/prompts';
 import OpenAILLM from './openaillm';
-import { StructuredOutputParser } from 'langchain/output_parsers';
+import { StructuredOutputParser } from '@langchain/core/output_parsers';
 import { LLMChain } from 'langchain/chains';
 import { ZodSchema } from 'zod';
 
