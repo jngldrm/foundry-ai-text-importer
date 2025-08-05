@@ -62,6 +62,7 @@
     "*.(json|css)": "prettier --write"
   },
   "dependencies": {
+    "@langchain/core": "^0.3.66",
     "@langchain/openai": "^0.6.3",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",

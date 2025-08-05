@@ -1,6 +1,6 @@
 /* eslint-disable jest/expect-expect, jest/no-export */
 
-import { LLM } from 'langchain/dist/llms/base';
+import { BaseLLM } from '@langchain/core/language_models/llms';
 import InnateSpellcastingParser from '../../monster-parser/text-parsing/Parsed5eSpellcastingItemParser';
 import { Parsed5eSpellcastingItem } from '../../monster-parser/schemas/parsed-input-data/spellcasting/Parsed5eSpellcastingItem';
 import Parsed5eSpellcastingItemParser from '../../monster-parser/text-parsing/Parsed5eSpellcastingItemParser';
