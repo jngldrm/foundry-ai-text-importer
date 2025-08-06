@@ -179,19 +179,45 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
       this.updateTabDisplay(html);
     });
     
-    // Submit button handler - handles both monsters and items
-    html.querySelector('#llmtci-submit')?.addEventListener('click', async (event) => {
+    // Monster submit button handler
+    html.querySelector('#llmtci-monster-submit')?.addEventListener('click', async (event) => {
       event.preventDefault();
-      const userText = (html.querySelector('#llmtci-userText') as HTMLInputElement)?.value as string;
+      const userText = (html.querySelector('#llmtci-monster-userText') as HTMLTextAreaElement)?.value as string;
+      if (!userText || userText.trim().length === 0) {
+        ui.notifications?.warn('Please enter monster stat block text');
+        return;
+      }
       this.userText = userText;
       this.startLoad();
       
-      if (this.activeTab === 'monsters') {
+      try {
         // main text block parsing function for monsters
         await genFoundry5eMonsterActorFromTextBlock(userText);
-      } else if (this.activeTab === 'items') {
+      } catch (error) {
+        console.error('Monster import error:', error);
+        ui.notifications?.error('Failed to import monster: ' + error.message);
+      }
+      
+      this.endLoad();
+    });
+
+    // Item submit button handler
+    html.querySelector('#llmtci-item-submit')?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      const userText = (html.querySelector('#llmtci-item-userText') as HTMLTextAreaElement)?.value as string;
+      if (!userText || userText.trim().length === 0) {
+        ui.notifications?.warn('Please enter item description text');
+        return;
+      }
+      this.userText = userText;
+      this.startLoad();
+      
+      try {
         // main text block parsing function for items
         await genFoundry5eItemActorFromTextBlock(userText);
+      } catch (error) {
+        console.error('Item import error:', error);
+        ui.notifications?.error('Failed to import item: ' + error.message);
       }
       
       this.endLoad();
