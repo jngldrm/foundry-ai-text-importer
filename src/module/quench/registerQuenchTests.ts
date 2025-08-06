@@ -1,5 +1,6 @@
 import registerDummyTest from './dummyTest';
 import registerExampleItemTests from './exampleItemTests';
+import registerItemImportTests from './itemImportTests';
 import registerFormatInstructionsTests from './formatInstructionsTests';
 import registerSpellcastingBasicItemTest from './llm-parsing-tests/llmParsingTests';
 import registerMonsterCompendiaTests from './monsterCompendiaTests';
@@ -31,6 +32,14 @@ const registerQuenchTests = (quench): void => {
     registerImportParsed5eSpellcastingItemTest,
     {
       displayName: 'Testing LLM Parsing Spellcasting Basic Item',
+      preSelected: false,
+    },
+  );
+  quench.registerBatch(
+    'quench.llm-text-content-importer.item-import-tests',
+    registerItemImportTests,
+    {
+      displayName: 'Testing Item Import Pipeline',
       preSelected: false,
     },
   );

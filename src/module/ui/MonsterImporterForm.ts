@@ -1,5 +1,6 @@
 import { OpenAI } from '@langchain/openai';
 import genFoundry5eMonsterActorFromTextBlock from '../genFoundryActorFromMonsterTextBlock';
+import genFoundry5eItemActorFromTextBlock from '../genFoundryItemFromTextBlock';
 import OpenAIAPIKeyStorage, {
   APIKeyValidationStatus,
 } from '../monster-parser/settings/openai-api-key/OpenAIAPIKeyStorage';
@@ -7,6 +8,9 @@ import OpenAIAPIKeyForm from '../monster-parser/settings/openai-api-key/OpenAIAP
 import foundryMonsterCompendia, {
   DEFAULT_MONSTER_COMPENDIUM_NAME,
 } from '../monster-parser/foundry-compendia/FoundryMonsterCompendia';
+import foundryItemCompendia, {
+  DEFAULT_ITEM_COMPENDIUM_NAME,
+} from '../monster-parser/foundry-compendia/FoundryItemCompendia';
 import { fetchGPTModels } from '../monster-parser/llm/openaiModels';
 import featureFlags from '../featureFlags';
 // V13 types - Data interface may have changed, will need to verify
@@ -24,8 +28,10 @@ type FormData = {
   invalidAPIKey: boolean;
   isLoading: boolean;
   actorCompendiumOptions: DropdownOption[];
+  itemCompendiumOptions: DropdownOption[];
   modelOptions: DropdownOption[];
   showModelSelector: boolean;
+  activeTab: 'monsters' | 'items';
 };
 
 const RERENDER_DURING_LOAD_INTERVAL_MS = 1000;
@@ -42,10 +48,13 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
   apiKeyValidationStatus: APIKeyValidationStatus = 'VALID'; // Initialize to VALID but validate in the background
   doesAPIKeyHaveProperModelAccess = true;
   showProgressView = false;
+  activeTab: 'monsters' | 'items' = 'monsters';
   // one-timevalidators
   hasValidatedAPIKey = false;
-  hasEnsuredDefaultCompendiumExists = false;
-  hasValidatedSelectedCompendium = false;
+  hasEnsuredDefaultMonsterCompendiumExists = false;
+  hasEnsuredDefaultItemCompendiumExists = false;
+  hasValidatedSelectedMonsterCompendium = false;
+  hasValidatedSelectedItemCompendium = false;
   keyForm: OpenAIAPIKeyForm;
   // Loading Tasks
   tickerTimeout: NodeJS.Timeout;
@@ -62,8 +71,10 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
 
   reload = async () => {
     this.hasValidatedAPIKey = false; // re-validate API key
-    this.hasEnsuredDefaultCompendiumExists = false;
-    this.hasValidatedSelectedCompendium = false;
+    this.hasEnsuredDefaultMonsterCompendiumExists = false;
+    this.hasEnsuredDefaultItemCompendiumExists = false;
+    this.hasValidatedSelectedMonsterCompendium = false;
+    this.hasValidatedSelectedItemCompendium = false;
     this.render();
     await this.keyForm.close({ force: true });
   };
@@ -125,14 +136,34 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
     
     const html = this.element;
     
-    // Submit button handler
+    // Tab switching handlers
+    html.querySelector('#llmtci-tab-monsters')?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      this.activeTab = 'monsters';
+      this.render();
+    });
+    
+    html.querySelector('#llmtci-tab-items')?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      this.activeTab = 'items';
+      this.render();
+    });
+    
+    // Submit button handler - handles both monsters and items
     html.querySelector('#llmtci-submit')?.addEventListener('click', async (event) => {
       event.preventDefault();
       const userText = (html.querySelector('#llmtci-userText') as HTMLInputElement)?.value as string;
       this.userText = userText;
       this.startLoad();
-      // main text block parsing function
-      await genFoundry5eMonsterActorFromTextBlock(userText);
+      
+      if (this.activeTab === 'monsters') {
+        // main text block parsing function for monsters
+        await genFoundry5eMonsterActorFromTextBlock(userText);
+      } else if (this.activeTab === 'items') {
+        // main text block parsing function for items
+        await genFoundry5eItemActorFromTextBlock(userText);
+      }
+      
       this.endLoad();
     });
     
@@ -142,11 +173,18 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
       this.keyForm.render(true);
     });
     
-    // Compendium select handler
-    html.querySelector('#llmtci-compendiumSelect')?.addEventListener('change', async (event) => {
+    // Monster compendium select handler
+    html.querySelector('#llmtci-monster-compendiumSelect')?.addEventListener('change', async (event) => {
       event.preventDefault();
       const selectedCompendiumName = (event.target as HTMLSelectElement).value;
       (game as any).settings.set('llm-text-content-importer', 'compendiumImportDestination', selectedCompendiumName);
+    });
+    
+    // Item compendium select handler
+    html.querySelector('#llmtci-item-compendiumSelect')?.addEventListener('change', async (event) => {
+      event.preventDefault();
+      const selectedCompendiumName = (event.target as HTMLSelectElement).value;
+      (game as any).settings.set('llm-text-content-importer', 'itemCompendiumImportDestination', selectedCompendiumName);
     });
     
     // Model selector (if enabled)
@@ -191,6 +229,19 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
     });
   }
 
+  async genItemCompendiumOptions(): Promise<DropdownOption[]> {
+    const itemCompendia = await foundryItemCompendia.getAllItemCompendia();
+    // Compendium options
+    const selectedCompendiumName = (game as any).settings.get('llm-text-content-importer', 'itemCompendiumImportDestination');
+    return itemCompendia.map((compendium) => {
+      return {
+        name: compendium.metadata.name,
+        label: compendium.metadata.label,
+        isSelected: selectedCompendiumName === compendium.metadata.name,
+      };
+    });
+  }
+
   async genModelOptions(): Promise<DropdownOption[]> {
     const gptModels = await fetchGPTModels();
     const selectedModelId = (game as any).settings.get('llm-text-content-importer', 'openaiModel');
@@ -217,25 +268,35 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
       validators.push(this.checkAPIKey());
       this.hasValidatedAPIKey = true;
     }
-    if (!this.hasEnsuredDefaultCompendiumExists) {
+    if (!this.hasEnsuredDefaultMonsterCompendiumExists) {
       validators.push(foundryMonsterCompendia.ensureDefaultCompendiumExists());
-      this.hasEnsuredDefaultCompendiumExists = true;
+      this.hasEnsuredDefaultMonsterCompendiumExists = true;
     }
-    if (!this.hasValidatedSelectedCompendium) {
+    if (!this.hasEnsuredDefaultItemCompendiumExists) {
+      validators.push(foundryItemCompendia.ensureDefaultItemCompendiumExists());
+      this.hasEnsuredDefaultItemCompendiumExists = true;
+    }
+    if (!this.hasValidatedSelectedMonsterCompendium) {
       validators.push(foundryMonsterCompendia.validateAndMaybeResetSelectedCompendium());
-      this.hasValidatedSelectedCompendium = true;
+      this.hasValidatedSelectedMonsterCompendium = true;
+    }
+    if (!this.hasValidatedSelectedItemCompendium) {
+      validators.push(foundryItemCompendia.validateAndMaybeResetSelectedItemCompendium());
+      this.hasValidatedSelectedItemCompendium = true;
     }
 
     await Promise.all(validators);
     
     return {
       ...context,
-      title: (game as any).i18n.localize('LLMTCI.MonsterFormTitle'),
+      title: (game as any).i18n.localize('LLMTCI.ImporterFormTitle') || 'AI Text Importer',
       apiKeyIsInvalid: this.apiKeyValidationStatus === 'INVALID_KEY',
       apiKeyHasNoModelAccess: this.apiKeyValidationStatus === 'NO_MODEL_ACCESS',
       isLoading: this.isLoading,
       showProgressView: this.showProgressView,
+      activeTab: this.activeTab,
       actorCompendiumOptions: await this.genActorCompendiumOptions(),
+      itemCompendiumOptions: await this.genItemCompendiumOptions(),
       showModelSelector: featureFlags.modelSelector,
       modelOptions: featureFlags.modelSelector ? await this.genModelOptions() : [],
       tasks: TaskTracker.tasks,

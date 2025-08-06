@@ -41,4 +41,57 @@ const findAllItemsWithName = async (name: string): Promise<Foundry5eItem[]> => {
   return items;
 };
 
-export default { findItemWithName, findAllItemsWithName };
+const getAllItemCompendia = async (): Promise<CompendiumCollection<any>[]> => {
+  // @ts-ignore (Type for Metadata is incorrect in foundry-vtt-types)
+  return (game as any).packs.filter((p) => p.metadata.type === 'Item');
+};
+
+const DEFAULT_ITEM_COMPENDIUM_NAME = 'ai-importer-items';
+
+const ensureDefaultItemCompendiumExists = async (): Promise<void> => {
+  const existingCompendium = (game as any).packs.find((pack) => pack.metadata.name === DEFAULT_ITEM_COMPENDIUM_NAME);
+  if (!existingCompendium) {
+    console.log('Creating default item compendium');
+    await CompendiumCollection.createCompendium({
+      name: DEFAULT_ITEM_COMPENDIUM_NAME,
+      label: (game as any).i18n.localize('LLMTCI.DefaultItemCompendiumLabel') || 'AI Importer Items',
+      type: 'Item',
+      system: 'dnd5e'
+    });
+  }
+};
+
+const validateAndMaybeResetSelectedItemCompendium = async (): Promise<void> => {
+  const selectedCompendiumName = (game as any).settings.get('llm-text-content-importer', 'itemCompendiumImportDestination');
+  const itemCompendia = await getAllItemCompendia();
+  const selectedCompendiumExists = itemCompendia.some((compendium) => compendium.metadata.name === selectedCompendiumName);
+  
+  if (!selectedCompendiumExists) {
+    console.log(`Selected item compendium ${selectedCompendiumName} does not exist, resetting to default`);
+    await (game as any).settings.set('llm-text-content-importer', 'itemCompendiumImportDestination', DEFAULT_ITEM_COMPENDIUM_NAME);
+  }
+};
+
+const saveAIImportedItemToCompendium = async (item: Item): Promise<void> => {
+  const selectedCompendiumName = (game as any).settings.get('llm-text-content-importer', 'itemCompendiumImportDestination');
+  const compendium = (game as any).packs.find((pack) => pack.metadata.name === selectedCompendiumName);
+  
+  if (!compendium) {
+    console.error(`Could not find compendium ${selectedCompendiumName} to save item to`);
+    return;
+  }
+  
+  console.log(`Saving AI imported item ${item.name} to compendium ${selectedCompendiumName}`);
+  await compendium.importDocument(item);
+};
+
+export default { 
+  findItemWithName, 
+  findAllItemsWithName,
+  getAllItemCompendia,
+  ensureDefaultItemCompendiumExists,
+  validateAndMaybeResetSelectedItemCompendium,
+  saveAIImportedItemToCompendium
+};
+
+export { DEFAULT_ITEM_COMPENDIUM_NAME };

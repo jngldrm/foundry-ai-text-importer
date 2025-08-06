@@ -1,5 +1,22 @@
 <form id="flavorerForm">
   <h1>{{title}}</h1>
+  
+  {{#unless showProgressView}}
+  {{#unless apiKeyIsInvalid}}
+  {{#unless apiKeyHasNoModelAccess}}
+  <!-- Tab Navigation -->
+  <div class="flexrow tab-navigation">
+    <button type="button" id="llmtci-tab-monsters" class="tab-button {{#if_eq activeTab 'monsters'}}active{{/if_eq}}">
+      <i class="fas fa-dragon"></i> Monsters
+    </button>
+    <button type="button" id="llmtci-tab-items" class="tab-button {{#if_eq activeTab 'items'}}active{{/if_eq}}">
+      <i class="fas fa-sword"></i> Items
+    </button>
+  </div>
+  {{/unless}}
+  {{/unless}}
+  {{/unless}}
+  
   {{#if showProgressView}}
   {{#each tasks}}
   <div class="flexrow">
@@ -38,32 +55,76 @@
     importer to work.</p>
   <button type="button" id="llmtci-updateAPIKey">Update API Key</button>
   {{else}}
-  {{! Compendium Selector }}
-  <label for="llmtci-compendiumSelect">Compendium:</label>
-  <select id="llmtci-compendiumSelect" class="form-select"=>
-    {{#each actorCompendiumOptions}}
-    <option value="{{this.name}}" {{#if this.isSelected}}selected{{/if}}>
-      {{this.label}}
-    </option>
-    {{/each}}
-  </select>
-  {{! Model Selector }}
-  {{#if showModelSelector}}
-  <label for="llmtci-modelSelect">Model:</label>
-  <select id="llmtci-modelSelect" class="form-select">
-    {{#each modelOptions}}
-    <option value="{{this.name}}" {{#if this.isSelected}}selected{{/if}}>
-      {{this.label}}
-    </option>
-    {{/each}}
+  
+  <!-- Monster Tab Content -->
+  {{#if_eq activeTab 'monsters'}}
+  <div class="tab-content monster-tab">
+    {{! Monster Compendium Selector }}
+    <label for="llmtci-monster-compendiumSelect">Monster Compendium:</label>
+    <select id="llmtci-monster-compendiumSelect" class="form-select">
+      {{#each actorCompendiumOptions}}
+      <option value="{{this.name}}" {{#if this.isSelected}}selected{{/if}}>
+        {{this.label}}
+      </option>
+      {{/each}}
+    </select>
+    
+    {{! Model Selector }}
+    {{#if showModelSelector}}
+    <label for="llmtci-modelSelect">Model:</label>
+    <select id="llmtci-modelSelect" class="form-select">
+      {{#each modelOptions}}
+      <option value="{{this.name}}" {{#if this.isSelected}}selected{{/if}}>
+        {{this.label}}
+      </option>
+      {{/each}}
+    </select>
     {{/if}}
-  </select>
-  <div class="flexrow">
-    <label>Monster Stat Block:</label>
+    
+    <div class="flexrow">
+      <label>Monster Stat Block:</label>
+    </div>
+    <div class="flexrow">
+      <textarea style="height: 800px" id="llmtci-userText" name="promptText" placeholder="Paste your monster stat block here..."></textarea>
+    </div>
+    <button type="submit" id="llmtci-submit">Import Monster</button>
   </div>
-  <div class="flexrow">
-    <textarea style="height: 800px" id="llmtci-userText" name="promptText"></textarea>
+  {{/if_eq}}
+  
+  <!-- Items Tab Content -->
+  {{#if_eq activeTab 'items'}}
+  <div class="tab-content item-tab">
+    {{! Item Compendium Selector }}
+    <label for="llmtci-item-compendiumSelect">Item Compendium:</label>
+    <select id="llmtci-item-compendiumSelect" class="form-select">
+      {{#each itemCompendiumOptions}}
+      <option value="{{this.name}}" {{#if this.isSelected}}selected{{/if}}>
+        {{this.label}}
+      </option>
+      {{/each}}
+    </select>
+    
+    {{! Model Selector }}
+    {{#if showModelSelector}}
+    <label for="llmtci-modelSelect">Model:</label>
+    <select id="llmtci-modelSelect" class="form-select">
+      {{#each modelOptions}}
+      <option value="{{this.name}}" {{#if this.isSelected}}selected{{/if}}>
+        {{this.label}}
+      </option>
+      {{/each}}
+    </select>
+    {{/if}}
+    
+    <div class="flexrow">
+      <label>Item Description:</label>
+    </div>
+    <div class="flexrow">
+      <textarea style="height: 800px" id="llmtci-userText" name="promptText" placeholder="Paste your item description here (weapons, armor, magic items, etc.)..."></textarea>
+    </div>
+    <button type="submit" id="llmtci-submit">Import Item</button>
   </div>
-  <button type="submit" id="llmtci-submit">Submit</button>
+  {{/if_eq}}
+  
   {{/if}}
 </form>

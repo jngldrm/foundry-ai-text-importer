@@ -11,15 +11,22 @@ export const registerSettings = (): void => {
     restricted: true,
   });
   (game as any).settings.register('llm-text-content-importer', 'compendiumImportDestination', {
-    name: 'Compendium Import Destination',
+    name: 'Monster Compendium Import Destination',
     hint: 'The compendium your monsters will be imported to',
+    type: String,
+    config: true, // Might want to take it out and just have it in input UI
+    scope: 'world', // "world" | "client" | "server"
+  });
+  (game as any).settings.register('llm-text-content-importer', 'itemCompendiumImportDestination', {
+    name: 'Item Compendium Import Destination',
+    hint: 'The compendium your items will be imported to',
     type: String,
     config: true, // Might want to take it out and just have it in input UI
     scope: 'world', // "world" | "client" | "server"
   });
   (game as any).settings.register('llm-text-content-importer', 'openaiModel', {
     name: 'OpenAI Model',
-    hint: 'The OpenAI model to use for generating monsters',
+    hint: 'The OpenAI model to use for generating monsters and items',
     type: String,
     config: featureFlags.modelSelector, // TODO - this needs to support a dropdown, not plaintext
     scope: 'world', // "world" | "client" | "server"
