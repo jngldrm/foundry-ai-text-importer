@@ -5,16 +5,16 @@ import registerQuenchTests from './quench/registerQuenchTests';
 import testRatkingWarfOutput from './quench/testRatkingWarfOutput';
 import MonsterImporterForm from './ui/MonsterImporterForm';
 
+// Register Handlebars helpers immediately when module loads
+(Handlebars as any).registerHelper('if_eq', function(a, b, options) {
+  if (a === b) {
+    return options.fn(this);
+  }
+  return options.inverse(this);
+});
+
 Hooks.on('ready', async () => {
   registerSettings();
-  
-  // Register Handlebars helpers
-  (Handlebars as any).registerHelper('if_eq', function(a, b, options) {
-    if (a === b) {
-      return options.fn(this);
-    }
-    return options.inverse(this);
-  });
 });
 
 Hooks.on('quenchReady', (quench) => {

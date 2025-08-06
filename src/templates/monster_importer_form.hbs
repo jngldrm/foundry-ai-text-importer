@@ -6,10 +6,10 @@
   {{#unless apiKeyHasNoModelAccess}}
   <!-- Tab Navigation -->
   <div class="flexrow tab-navigation">
-    <button type="button" id="llmtci-tab-monsters" class="tab-button {{#if_eq activeTab 'monsters'}}active{{/if_eq}}">
+    <button type="button" id="llmtci-tab-monsters" class="tab-button" data-tab="monsters">
       <i class="fas fa-dragon"></i> Monsters
     </button>
-    <button type="button" id="llmtci-tab-items" class="tab-button {{#if_eq activeTab 'items'}}active{{/if_eq}}">
+    <button type="button" id="llmtci-tab-items" class="tab-button" data-tab="items">
       <i class="fas fa-sword"></i> Items
     </button>
   </div>
@@ -57,8 +57,7 @@
   {{else}}
   
   <!-- Monster Tab Content -->
-  {{#if_eq activeTab 'monsters'}}
-  <div class="tab-content monster-tab">
+  <div class="tab-content monster-tab" id="monsters-content">
     {{! Monster Compendium Selector }}
     <label for="llmtci-monster-compendiumSelect">Monster Compendium:</label>
     <select id="llmtci-monster-compendiumSelect" class="form-select">
@@ -89,11 +88,9 @@
     </div>
     <button type="submit" id="llmtci-submit">Import Monster</button>
   </div>
-  {{/if_eq}}
   
   <!-- Items Tab Content -->
-  {{#if_eq activeTab 'items'}}
-  <div class="tab-content item-tab">
+  <div class="tab-content item-tab" id="items-content" style="display:none;">
     {{! Item Compendium Selector }}
     <label for="llmtci-item-compendiumSelect">Item Compendium:</label>
     <select id="llmtci-item-compendiumSelect" class="form-select">
@@ -124,7 +121,6 @@
     </div>
     <button type="submit" id="llmtci-submit">Import Item</button>
   </div>
-  {{/if_eq}}
   
   {{/if}}
 </form>

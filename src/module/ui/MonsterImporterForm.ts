@@ -118,6 +118,33 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
     this.render();
   }
 
+  updateTabDisplay(html: HTMLElement) {
+    // Update tab button states
+    const monsterTab = html.querySelector('#llmtci-tab-monsters');
+    const itemTab = html.querySelector('#llmtci-tab-items');
+    const monsterContent = html.querySelector('#monsters-content') as HTMLElement;
+    const itemContent = html.querySelector('#items-content') as HTMLElement;
+
+    if (monsterTab && itemTab && monsterContent && itemContent) {
+      // Remove active class from all tabs
+      monsterTab.classList.remove('active');
+      itemTab.classList.remove('active');
+
+      // Hide all content
+      monsterContent.style.display = 'none';
+      itemContent.style.display = 'none';
+
+      // Show active tab and content
+      if (this.activeTab === 'monsters') {
+        monsterTab.classList.add('active');
+        monsterContent.style.display = 'block';
+      } else {
+        itemTab.classList.add('active');
+        itemContent.style.display = 'block';
+      }
+    }
+  }
+
   async _renderHTML(context, options) {
     // ApplicationV2 template rendering
     const template = 'modules/llm-text-content-importer/templates/monster_importer_form.hbs';
@@ -136,17 +163,20 @@ class MonsterImporterForm extends foundry.applications.api.ApplicationV2 {
     
     const html = this.element;
     
+    // Initialize tab state
+    this.updateTabDisplay(html);
+    
     // Tab switching handlers
     html.querySelector('#llmtci-tab-monsters')?.addEventListener('click', async (event) => {
       event.preventDefault();
       this.activeTab = 'monsters';
-      this.render();
+      this.updateTabDisplay(html);
     });
     
     html.querySelector('#llmtci-tab-items')?.addEventListener('click', async (event) => {
       event.preventDefault();
       this.activeTab = 'items';
-      this.render();
+      this.updateTabDisplay(html);
     });
     
     // Submit button handler - handles both monsters and items
