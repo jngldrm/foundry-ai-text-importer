@@ -16,7 +16,7 @@ const OpenAILLM = (modelOverride?: string): ChatOpenAI => {
   return new ChatOpenAI({
     model: modelName,
     temperature: 0,
-    openAIApiKey: OpenAIAPIKeyStorage.getApiKey(),
+    apiKey: OpenAIAPIKeyStorage.getApiKey(),
   });
 };
 
