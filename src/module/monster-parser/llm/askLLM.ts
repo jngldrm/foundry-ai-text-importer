@@ -2,6 +2,9 @@ import { PromptTemplate } from '@langchain/core/prompts';
 import OpenAILLM from './openaillm';
 import { StructuredOutputParser } from '@langchain/core/output_parsers';
 import { ZodSchema } from 'zod';
+import rateLimiter from './rateLimiter';
+import retryHandler from './retryHandler';
+import APIErrorHandler from './errorHandler';
 
 async function askLLM<TInput, TOutput>(
   promptText: string,
@@ -27,10 +30,30 @@ async function askLLM<TInput, TOutput>(
   // Use modern LCEL syntax instead of deprecated LLMChain
   const chain = prompt.pipe(llm).pipe(outputParser);
   
-  let output = await chain.invoke({
-    formatInstructions: outputParser.getFormatInstructions(),
-    ...inputOptions,
-  }) as any;
+  // Wrap the API call with rate limiting and retry logic
+  let output: any;
+  try {
+    output = await retryHandler.executeWithRetry(
+      () => rateLimiter.execute(() => chain.invoke({
+        formatInstructions: outputParser.getFormatInstructions(),
+        ...inputOptions,
+      })),
+      `OpenAI API call for ${promptText.slice(0, 50)}...`
+    ) as any;
+  } catch (error) {
+    // Enhanced error handling with user-friendly messages
+    const errorInfo = APIErrorHandler.analyzeError(error);
+    const context = `LLM parsing: ${promptText.slice(0, 100)}...`;
+    
+    // Display user-friendly error
+    APIErrorHandler.displayError(errorInfo, context);
+    
+    // Log rate limiter status for debugging
+    APIErrorHandler.logRateLimiterStatus(rateLimiter);
+    
+    // Re-throw for upstream error handling
+    throw error;
+  }
 
   // This does not support nested overrides, will need to implement when necessary
   // Apply field overrides before casting
