@@ -110,12 +110,12 @@ export default class Foundry5eMonsterFormatter implements Foundry5eMonster {
       ac: {
         flat: basicInfo.armorClass.value,
         calc: basicInfo.armorClass.type,
-        formula: basicInfo.armorClass.formula,
+        formula: this.sanitizeFormula(basicInfo.armorClass.formula),
       },
       hp: {
         value: basicInfo.hitPoints.average,
         max: basicInfo.hitPoints.average,
-        formula: basicInfo.hitPoints.formula,
+        formula: this.sanitizeFormula(basicInfo.hitPoints.formula),
       },
       // TODO
       init: {
@@ -259,4 +259,39 @@ export default class Foundry5eMonsterFormatter implements Foundry5eMonster {
   // get _stats(): FoundryMonsterStats {
   //   return FoundryMonsterStatsSchema.parse(gargoyleJSON._stats);
   // }
+
+  /**
+   * Sanitizes formula strings to ensure they conform to Foundry VTT's formula validation
+   * Returns empty string for invalid formulas
+   */
+  private sanitizeFormula(formula: string): string {
+    if (!formula || typeof formula !== 'string') {
+      return '';
+    }
+
+    // Trim whitespace
+    const trimmed = formula.trim();
+    
+    // If empty, return empty string
+    if (!trimmed) {
+      return '';
+    }
+
+    // Check if it's a valid dice/math formula pattern (digits, d, +, -, *, /, spaces, parentheses)
+    const validFormulaPattern = /^[\d\s\+\-\*\/\(\)d]+$/i;
+    
+    // If it doesn't match the basic pattern, return empty string
+    if (!validFormulaPattern.test(trimmed)) {
+      console.warn(`Invalid formula detected: "${formula}". Clearing formula field.`);
+      return '';
+    }
+
+    // Additional check: if it starts with a letter (like "shield"), it's likely descriptive text
+    if (/^[a-zA-Z]/.test(trimmed)) {
+      console.warn(`Formula appears to be descriptive text: "${formula}". Clearing formula field.`);
+      return '';
+    }
+
+    return trimmed;
+  }
 }
