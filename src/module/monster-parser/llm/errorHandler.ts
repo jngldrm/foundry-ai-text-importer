@@ -39,7 +39,7 @@ class APIErrorHandler {
         userMessage: `API rate limit exceeded. ${retryAfter ? `Retry after ${Math.ceil(retryAfter / 1000)} seconds.` : 'Please wait and try again.'}`,
         technicalMessage: errorMessage,
         suggestedAction: "The system will automatically retry with exponential backoff. If this persists, consider reducing concurrent requests.",
-        retryAfter
+        retryAfter: retryAfter || undefined
       };
     }
     
