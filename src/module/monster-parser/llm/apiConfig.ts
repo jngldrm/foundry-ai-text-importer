@@ -94,8 +94,8 @@ class APIConfigManager {
   private loadFromFoundrySettings(): void {
     try {
       // Load from Foundry settings if available
-      if (typeof game !== 'undefined' && game.settings) {
-        const settings = game.settings;
+      if (typeof game !== 'undefined' && game && (game as any).settings) {
+        const settings = (game as any).settings;
         
         // Rate limiting settings
         const rateLimitEnabled = settings.get('llm-text-content-importer', 'rateLimitingEnabled') as boolean;
@@ -219,7 +219,7 @@ class APIConfigManager {
    * Register Foundry settings for the optimization config
    */
   static registerFoundrySettings(): void {
-    const settings = game.settings;
+    const settings = (game as any).settings;
     const moduleId = 'llm-text-content-importer';
 
     // Rate limiting settings
