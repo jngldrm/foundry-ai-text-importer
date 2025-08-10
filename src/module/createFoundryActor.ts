@@ -1,4 +1,5 @@
 import { Foundry5eMonster } from './monster-parser/schemas/foundry/monster/Foundry5eMonster';
+import { createItemInAIFolder } from './folderManager';
 
 /**
  * This will import an already-formatted monster object into foundry
@@ -40,7 +41,7 @@ export const createFoundryActor = async (monster: Foundry5eMonster): Promise<Act
 const createFoundryItems = async (items): Promise<Item[]> => {
   return await Promise.all(
     items.map(async (itemData) => {
-      const item = await Item.create(itemData);
+      const item = await createItemInAIFolder(itemData);
       return item;
     }),
   );
@@ -64,7 +65,7 @@ const addAllNonEmbeddedActorFields = async (monsterActor, monster) => {
 
 const createFoundryItem = async (itemOutput): Promise<Item> => {
   // try {
-  const item = await Item.create({
+  const item = await createItemInAIFolder({
     name: itemOutput.name,
     type: itemOutput.type,
   });

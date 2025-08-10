@@ -6,6 +6,7 @@ import Foundry5eItemFormatter from './monster-parser/foundry-parsing/Foundry5eIt
 import TaskTracker from './performanceUtils/TaskTracker';
 import askLLM from './monster-parser/llm/askLLM';
 import foundryItemCompendia from './monster-parser/foundry-compendia/FoundryItemCompendia';
+import { createItemInAIFolder } from './folderManager';
 
 type ItemTextParsingStrategy = 'BASIC_ITEM_EXTRACTION' | 'DIRECT_PARSING';
 
@@ -112,8 +113,8 @@ const genFoundry5eItemActorFromTextBlock = async (textBlock: string): Promise<It
   // Generate foundry item from text block
   const item = await genFoundry5eItemFromTextBlock(textBlock);
   
-  // Create the item in Foundry (similar to how monsters are created)
-  const createdItem = await Item.create(item);
+  // Create the item in Foundry using the AI folder system
+  const createdItem = await createItemInAIFolder(item);
   if (!createdItem) {
     throw new Error('Failed to create item in Foundry');
   }
