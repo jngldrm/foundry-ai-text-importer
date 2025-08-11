@@ -112,19 +112,16 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
         case 'weapon':
           return 'weapon';
         case 'equipment':
+        case 'tool':
+        case 'loot':
+        case 'backpack':
           return 'equipment';
         case 'consumable':
-          return 'consumable';
-        case 'tool':
-          return 'tool';
-        case 'loot':
-          return 'loot';
-        case 'backpack':
-          return 'backpack';
+          return 'feat'; // Map consumables to feat for magical items/abilities
         case 'spell':
           return 'spell';
         default:
-          return 'loot';
+          return 'equipment';
       }
     }
 
@@ -251,7 +248,7 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
       
       return {
         value: weaponType,
-        baseItem: this.parsedItem.baseItem || getBaseItem(this.parsedItem.name)
+        subtype: this.parsedItem.baseItem || getBaseItem(this.parsedItem.name)
       };
     }
     
@@ -261,13 +258,13 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
         
       return {
         value: equipmentType,
-        baseItem: this.parsedItem.baseItem || ''
+        subtype: this.parsedItem.baseItem || ''
       };
     }
     
     return {
       value: this.parsedItem.itemSubtype || '',
-      baseItem: this.parsedItem.baseItem || ''
+      subtype: this.parsedItem.baseItem || ''
     };
   }
 
