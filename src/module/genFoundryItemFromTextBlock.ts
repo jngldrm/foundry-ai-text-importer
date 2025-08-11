@@ -115,7 +115,7 @@ const parseItemDirectlyFromText = async (text: string): Promise<Parsed5eItem> =>
 
     EXAMPLES:
     - "Longsword" → itemType: "weapon", weaponType: "martialM", baseItem: "longsword", properties: ["versatile"]
-    - "Studded Leather Armor" → itemType: "equipment", equipmentType: "light", armorClass: {value: 12, dex: 2}
+    - "Studded Leather Armor" → itemType: "equipment", equipmentType: "light", armorClass: {{value: 12, dex: 2}}
     - "Potion of Healing" → itemType: "consumable", rarity: "common"
 
     SCHEMA AND FORMAT INSTRUCTIONS:
