@@ -420,7 +420,7 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
         },
         attack: {
           ability: '',
-          bonus: '',
+          bonus: this.magicalBonus ? this.magicalBonus.toString() : '',
           critical: {
             threshold: null
           },
@@ -435,7 +435,7 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
             bonus: ''
           },
           includeBase: true,
-          parts: []
+          parts: this.getDamageParts()
         },
         uses: {
           spent: 0,
@@ -448,5 +448,26 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
 
   get identifier(): string {
     return this.parsedItem.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+  }
+
+  /**
+   * Generate damage parts for activities, including magical bonuses
+   */
+  private getDamageParts(): Array<[string, string]> {
+    if (!this.parsedItem.damage?.parts || this.parsedItem.damage.parts.length === 0) {
+      return [];
+    }
+
+    // Start with the base damage parts
+    const damageParts: Array<[string, string]> = [...this.parsedItem.damage.parts];
+    
+    // If there's a magical bonus, add it to the first damage part (base weapon damage)
+    if (this.magicalBonus && damageParts.length > 0) {
+      const [baseDamage, damageType] = damageParts[0];
+      // Add magical bonus to the base damage formula
+      damageParts[0] = [`${baseDamage} + ${this.magicalBonus}`, damageType];
+    }
+    
+    return damageParts;
   }
 }
