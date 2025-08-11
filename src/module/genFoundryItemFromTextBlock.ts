@@ -109,12 +109,14 @@ const parseItemDirectlyFromText = async (text: string): Promise<Parsed5eItem> =>
        - Stealth disadvantage
     5. **Magic Item Properties**: 
        - Attunement requirements
-       - Magical bonuses
+       - **Magical bonuses**: Look for phrases like "+1 bonus to attack and damage rolls", "gains a +2 bonus", "provides a +3 bonus" and extract the numerical value as magicalBonus
+       - **Magical AC bonuses**: For armor, extract bonuses like "+1 AC" as armorClass.magicalBonus
        - Special abilities and usage limitations
     6. **Combat Mechanics**: Extract activation costs, duration, targets, saves, etc.
 
     EXAMPLES:
     - "Longsword" → itemType: "weapon", weaponType: "martialM", baseItem: "longsword", properties: ["versatile"]
+    - "Dagger +1" with "+1 bonus to attack and damage rolls" → itemType: "weapon", weaponType: "simpleM", baseItem: "dagger", magicalBonus: 1, rarity: "uncommon"
     - "Studded Leather Armor" → itemType: "equipment", equipmentType: "light", armorClass: {{value: 12, dex: 2}}
     - "Potion of Healing" → itemType: "consumable", rarity: "common"
 
