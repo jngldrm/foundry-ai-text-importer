@@ -454,7 +454,16 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
    * Generate damage parts for activities, including magical bonuses
    */
   private getDamageParts(): Array<[string, string]> {
+    console.log('🔍 DEBUG getDamageParts:', {
+      hasDamage: !!this.parsedItem.damage,
+      hasParts: !!this.parsedItem.damage?.parts,
+      partsLength: this.parsedItem.damage?.parts?.length || 0,
+      parts: this.parsedItem.damage?.parts,
+      magicalBonus: this.magicalBonus
+    });
+    
     if (!this.parsedItem.damage?.parts || this.parsedItem.damage.parts.length === 0) {
+      console.log('⚠️ No damage parts found, returning empty array');
       return [];
     }
 
@@ -465,9 +474,15 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
     if (this.magicalBonus && damageParts.length > 0) {
       const [baseDamage, damageType] = damageParts[0];
       // Add magical bonus to the base damage formula
-      damageParts[0] = [`${baseDamage} + ${this.magicalBonus}`, damageType];
+      const enhancedDamage = `${baseDamage} + ${this.magicalBonus}`;
+      damageParts[0] = [enhancedDamage, damageType];
+      console.log('✨ Applied magical bonus:', {
+        original: `${baseDamage} (${damageType})`,
+        enhanced: `${enhancedDamage} (${damageType})`
+      });
     }
     
+    console.log('📊 Final damage parts:', damageParts);
     return damageParts;
   }
 }
