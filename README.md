@@ -2,7 +2,7 @@
 
 Import any monster stat block right into FoundryVTT using GPT!
 
-*DnD5e and GPT-4 support only for now, more systems and LLMs to come!*
+*DnD5e and GPT-5 support only for now, more systems and LLMs to come!*
 
 ## Video Demo
 Here is a [short video demo](https://www.youtube.com/watch?v=FTbdSSAQR28&ab_channel=WillGregoire) importing a Couatling by copy-pasting text from D&D Beyond (but you can import from any stat block you want!)
@@ -11,10 +11,10 @@ Here is a [short video demo](https://www.youtube.com/watch?v=FTbdSSAQR28&ab_chan
 
 ## Prerequisites
 
-**Subscribe to an OpenAI plan with GPT-4 access (Required)**
+**Subscribe to an OpenAI plan with GPT-5 access (Required)**
 Sign up for a plan on the [OpenAI Website](https://platform.openai.com/signup)
 
-*This module currently uses gpt-4-turbo-preview to power its text content parsing. Models that are available through the free plan (i.e. gpt-3.5-turbo) after testing do not provide accurate results. Support for other LLM providers, including Ollama, is in development.*
+*This module currently uses gpt-5-mini to power its text content parsing. Models that are available through the free plan (i.e. gpt-3.5-turbo) after testing do not provide accurate results. Support for other LLM providers, including Ollama, is in development.*
 
 
 **Import the DnD 5e SRD (Recommended but not necessary)**

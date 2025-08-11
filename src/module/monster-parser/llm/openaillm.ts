@@ -2,7 +2,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import OpenAIAPIKeyStorage from '../settings/openai-api-key/OpenAIAPIKeyStorage';
 import featureFlags from '../../featureFlags';
 
-const DEFAULT_OPENAI_MODEL_NAME = 'gpt-4-turbo-preview';
+const DEFAULT_OPENAI_MODEL_NAME = 'gpt-5-mini';
 
 const OpenAILLM = (modelOverride?: string): ChatOpenAI => {
   let modelName;

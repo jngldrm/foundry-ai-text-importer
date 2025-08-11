@@ -24,7 +24,7 @@
     "ItemCompendiumImportDestinationSettingLabel": "Item Compendium Import Destination",
     "ItemCompendiumImportDestinationSettingHint": "The compendium your items will be imported to",
     "OpenAIModelSettingLabel": "OpenAI Model",
-    "OpenAIModelSettingHint": "The OpenAI model to use for generating monsters and items (highly recommended: gpt-4-turbo-preview or gpt-4)",
+    "OpenAIModelSettingHint": "The OpenAI model to use for generating monsters and items (highly recommended: gpt-5-mini)",
     "APIKeySubmenuTitle": "OpenAI Secret API Key",
     "APIKeySubmenuDescription": "Enter your OpenAI Secret API key here! You can get one from the ",
     "APIKeySubmenuDescriptionLink": "OpenAI website",

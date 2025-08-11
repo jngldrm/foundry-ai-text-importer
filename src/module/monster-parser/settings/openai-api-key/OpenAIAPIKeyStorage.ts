@@ -1,5 +1,5 @@
 const VALIDATION_API_ENDPOINT = 'https://api.openai.com/v1/models';
-const VALID_MODEL_CONTAINS = 'gpt-4';
+const VALID_MODEL_CONTAINS = 'gpt-5';
 export type APIKeyValidationStatus = 'VALID' | 'NO_MODEL_ACCESS' | 'INVALID_KEY';
 
 export default class OpenAIAPIKeyStorage {
