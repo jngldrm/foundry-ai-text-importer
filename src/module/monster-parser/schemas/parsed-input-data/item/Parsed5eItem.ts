@@ -5,10 +5,49 @@ import { ActionTypeEnumSchema } from '../../enums/ActionType';
 import { ItemTypeEnumSchema } from '../../enums/ItemType';
 
 /**
- * This includes only the fields we will actually ask for (as opposed to reverting to default), with a simplified structure
+ * Comprehensive schema for D&D 5e items including all fields needed for proper FoundryVTT import
  */
 export const Parsed5eItemSchema = z.object({
   name: z.string(),
+  
+  // Basic item information
+  itemType: z.enum(['weapon', 'equipment', 'consumable', 'tool', 'loot', 'backpack', 'spell']).describe('The main category of this item'),
+  itemSubtype: z.string().optional().describe('More specific type (e.g., "longsword", "studded leather", "potion")'),
+  
+  // Physical properties
+  weight: z.object({
+    value: z.number().optional().describe('Weight in pounds'),
+    units: z.string().default('lb').describe('Weight units, typically "lb"'),
+  }).optional(),
+  
+  price: z.object({
+    value: z.number().optional().describe('Price value'),
+    denomination: z.enum(['cp', 'sp', 'ep', 'gp', 'pp']).default('gp').describe('Currency denomination'),
+  }).optional(),
+  
+  rarity: z.enum(['common', 'uncommon', 'rare', 'veryRare', 'legendary', 'artifact']).optional().describe('Item rarity level'),
+  
+  // Weapon-specific properties
+  weaponType: z.enum(['simpleM', 'simpleR', 'martialM', 'martialR', 'natural', 'improv']).optional().describe('Weapon proficiency category'),
+  baseItem: z.string().optional().describe('Base weapon type (longsword, dagger, etc.)'),
+  
+  properties: z.array(z.string()).optional().describe('Weapon properties like "versatile", "finesse", "light", "heavy", "reach", "thrown", "two-handed", "ammunition", "loading", "special"'),
+  
+  // Equipment-specific properties  
+  armorClass: z.object({
+    value: z.number().optional(),
+    dex: z.number().optional().describe('Max dex bonus for armor'),
+    magicalBonus: z.number().optional().describe('Magical AC bonus'),
+  }).optional(),
+  
+  equipmentType: z.string().optional().describe('Equipment category like "light", "medium", "heavy", "shield", "clothing", etc.'),
+  
+  // Magic item properties
+  attunement: z.enum(['required', 'optional', '']).default('').describe('Attunement requirement'),
+  magicalBonus: z.number().optional().describe('Magical attack/damage bonus for weapons'),
+  
+  // Item quantities and uses
+  quantity: z.number().default(1).describe('Number of items'),
   activation: z.object({
     type: ActivationTypeEnumSchema,
     cost: z.number(),

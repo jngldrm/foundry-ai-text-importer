@@ -6,6 +6,13 @@ import { SavingThrowScaling, SavingThrowScalingEnumSchema } from '../schemas/enu
 import { Foundry5eItemDurationSchema } from '../schemas/foundry/item/Foundry5eItemDuration';
 import { Foundry5eRangeSchema } from '../schemas/foundry/item/Foundry5eRange';
 import { FoundryActionTypeFromActionType } from '../schemas/enums/foundry-specific/FoundryActionType';
+import { 
+  mapWeaponProperties, 
+  determineWeaponType, 
+  getBaseItem, 
+  determineEquipmentType,
+  parseRarity 
+} from '../utils/itemPropertyMapping';
 
 export default class Foundry5eItemFormatter implements Foundry5eItem {
   private parsedItem: Parsed5eItem;
@@ -29,13 +36,17 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
   }
 
   get system(): Foundry5eItem['system'] {
-    return {
+    const baseSystem = {
       description: this.description,
       source: this.source,
-      activation: this.activation,
-      duration: this.duration,
+      quantity: this.quantity,
+      weight: this.weight,
+      price: this.price,
+      attunement: this.attunement,
+      equipped: false,
+      rarity: this.rarity,
+      identified: true,
       cover: this.cover,
-      target: this.target,
       range: this.range,
       uses: this.uses,
       consume: this.consume,
@@ -50,7 +61,44 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
       type: this.systemType,
       requirements: this.requirements,
       recharge: this.recharge,
+      activation: this.activation,
+      duration: this.duration,
+      target: this.target,
+      unidentified: { description: '' },
+      container: null,
+      crewed: false
     };
+
+    // Add weapon-specific properties
+    if (this.type === 'weapon') {
+      return {
+        ...baseSystem,
+        properties: this.properties,
+        proficient: null,
+        magicalBonus: this.magicalBonus,
+        activities: this.activities,
+        attuned: false,
+        ammunition: {},
+        mastery: '',
+        identifier: this.identifier
+      };
+    }
+    
+    // Add equipment-specific properties
+    if (this.type === 'equipment') {
+      return {
+        ...baseSystem,
+        armor: this.armor,
+        hp: this.hp,
+        speed: this.speed,
+        strength: this.strength,
+        proficient: null,
+        properties: this.properties || []
+      };
+    }
+
+    // Default system for other item types
+    return baseSystem;
   }
 
   get name(): string {
@@ -58,7 +106,29 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
   }
 
   get type(): Foundry5eItem['type'] {
-    // Inferring foundry item type from actionType for now, only allowing weapons and feats
+    // Use the new itemType field from the parsed item
+    if (this.parsedItem.itemType) {
+      switch (this.parsedItem.itemType) {
+        case 'weapon':
+          return 'weapon';
+        case 'equipment':
+          return 'equipment';
+        case 'consumable':
+          return 'consumable';
+        case 'tool':
+          return 'tool';
+        case 'loot':
+          return 'loot';
+        case 'backpack':
+          return 'backpack';
+        case 'spell':
+          return 'spell';
+        default:
+          return 'loot';
+      }
+    }
+
+    // Fallback to inferring from actionType (legacy behavior)
     switch (this.parsedItem.actionType) {
       case 'meleeWeaponAttack':
       case 'rangedWeaponAttack':
@@ -175,9 +245,29 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
   }
 
   get systemType(): Foundry5eItem['system']['type'] {
+    if (this.type === 'weapon') {
+      const weaponType = this.parsedItem.weaponType || 
+        determineWeaponType(this.parsedItem.itemSubtype || '', this.parsedItem.name);
+      
+      return {
+        value: weaponType,
+        baseItem: this.parsedItem.baseItem || getBaseItem(this.parsedItem.name)
+      };
+    }
+    
+    if (this.type === 'equipment') {
+      const equipmentType = this.parsedItem.equipmentType ||
+        determineEquipmentType(this.parsedItem.itemSubtype || '', this.parsedItem.description);
+        
+      return {
+        value: equipmentType,
+        baseItem: this.parsedItem.baseItem || ''
+      };
+    }
+    
     return {
-      value: '',
-      subtype: '',
+      value: this.parsedItem.itemSubtype || '',
+      baseItem: this.parsedItem.baseItem || ''
     };
   }
 
@@ -206,5 +296,160 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
 
   get folder(): Foundry5eItem['folder'] {
     return null;
+  }
+
+  // New property getters for comprehensive item data
+
+  get quantity(): number {
+    return this.parsedItem.quantity || 1;
+  }
+
+  get weight(): { value: number; units: string } {
+    return {
+      value: this.parsedItem.weight?.value || 0,
+      units: this.parsedItem.weight?.units || 'lb'
+    };
+  }
+
+  get price(): { value: number; denomination: string } {
+    return {
+      value: this.parsedItem.price?.value || 0,
+      denomination: this.parsedItem.price?.denomination || 'gp'
+    };
+  }
+
+  get attunement(): string {
+    return this.parsedItem.attunement || '';
+  }
+
+  get rarity(): string {
+    return this.parsedItem.rarity || 'common';
+  }
+
+  get properties(): string[] {
+    if (!this.parsedItem.properties) return [];
+    return mapWeaponProperties(this.parsedItem.properties);
+  }
+
+  get magicalBonus(): number | null {
+    return this.parsedItem.magicalBonus || null;
+  }
+
+  get armor(): { value: number; dex?: number; magicalBonus?: number | null } {
+    return {
+      value: this.parsedItem.armorClass?.value || 10,
+      dex: this.parsedItem.armorClass?.dex,
+      magicalBonus: this.parsedItem.armorClass?.magicalBonus || null
+    };
+  }
+
+  get hp(): { value: number; max: number; dt: null; conditions: string } {
+    return {
+      value: 0,
+      max: 0,
+      dt: null,
+      conditions: ''
+    };
+  }
+
+  get speed(): { value: null; conditions: string } {
+    return {
+      value: null,
+      conditions: ''
+    };
+  }
+
+  get strength(): null {
+    return null;
+  }
+
+  get activities(): Record<string, any> {
+    if (this.type !== 'weapon') return {};
+
+    // Generate a basic attack activity for weapons
+    return {
+      'dnd5eactivity000': {
+        _id: 'dnd5eactivity000',
+        type: 'attack',
+        activation: {
+          type: 'action',
+          value: 1,
+          condition: '',
+          override: false
+        },
+        consumption: {
+          targets: [],
+          scaling: {
+            allowed: false,
+            max: ''
+          },
+          spellSlot: true
+        },
+        description: {
+          chatFlavor: ''
+        },
+        duration: {
+          concentration: false,
+          value: '',
+          units: 'inst',
+          special: '',
+          override: false
+        },
+        effects: [],
+        range: {
+          value: this.parsedItem.range?.value?.toString() || '5',
+          units: this.parsedItem.range?.units || 'ft',
+          special: '',
+          override: false
+        },
+        target: {
+          template: {
+            count: '',
+            contiguous: false,
+            type: '',
+            size: '',
+            width: '',
+            height: '',
+            units: ''
+          },
+          affects: {
+            count: '',
+            type: '',
+            choice: false,
+            special: ''
+          },
+          prompt: true,
+          override: false
+        },
+        attack: {
+          ability: '',
+          bonus: '',
+          critical: {
+            threshold: null
+          },
+          flat: false,
+          type: {
+            value: this.parsedItem.range?.value ? 'ranged' : 'melee',
+            classification: 'weapon'
+          }
+        },
+        damage: {
+          critical: {
+            bonus: ''
+          },
+          includeBase: true,
+          parts: []
+        },
+        uses: {
+          spent: 0,
+          recovery: []
+        },
+        sort: 0
+      }
+    };
+  }
+
+  get identifier(): string {
+    return this.parsedItem.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
   }
 }

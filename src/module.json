@@ -2,7 +2,7 @@
   "id": "llm-text-content-importer",
   "title": "AI Text Importer",
   "description": "Import monsters and items into Foundry from any plaintext source! Uses GPT to parse text and create monsters or items for you.",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "compatibility": {
     "minimum": 12,
     "maximum": 13,

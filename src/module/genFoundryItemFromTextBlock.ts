@@ -89,10 +89,34 @@ const parseItemDirectlyFromText = async (text: string): Promise<Parsed5eItem> =>
   const itemSchema = await import('./monster-parser/schemas/parsed-input-data/item/Parsed5eItem');
   
   return askLLM<{ text: string }, Parsed5eItem>(
-    `Parse the provided item text into the json schema specified below. Extract all relevant game mechanics including damage, range, activation costs, etc.
+    `Parse the provided D&D 5e item text into the comprehensive JSON schema specified below. Extract ALL relevant information including physical properties, weapon/equipment specifics, and game mechanics.
 
     ITEM TEXT TO PARSE:
     {text}
+
+    INSTRUCTIONS FOR PARSING:
+    1. **Item Type Classification**: Determine if this is a weapon, equipment (armor/clothing/wondrous item), consumable, tool, loot, etc.
+    2. **Physical Properties**: Extract weight, price, and rarity if mentioned
+    3. **Weapon Properties**: For weapons, identify:
+       - Weapon category (Simple/Martial, Melee/Ranged)
+       - Base weapon type (longsword, dagger, etc.)
+       - Properties (versatile, finesse, light, heavy, reach, thrown, two-handed, ammunition, loading, special)
+       - Damage dice and type
+       - Range (for ranged weapons)
+    4. **Equipment Properties**: For armor/equipment, identify:
+       - Armor class and type (light/medium/heavy armor, shield, clothing)
+       - Strength requirements
+       - Stealth disadvantage
+    5. **Magic Item Properties**: 
+       - Attunement requirements
+       - Magical bonuses
+       - Special abilities and usage limitations
+    6. **Combat Mechanics**: Extract activation costs, duration, targets, saves, etc.
+
+    EXAMPLES:
+    - "Longsword" → itemType: "weapon", weaponType: "martialM", baseItem: "longsword", properties: ["versatile"]
+    - "Studded Leather Armor" → itemType: "equipment", equipmentType: "light", armorClass: {value: 12, dex: 2}
+    - "Potion of Healing" → itemType: "consumable", rarity: "common"
 
     SCHEMA AND FORMAT INSTRUCTIONS:
     {formatInstructions}
