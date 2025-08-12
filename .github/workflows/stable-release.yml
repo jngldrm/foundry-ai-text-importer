@@ -1,15 +1,17 @@
-name: Release
+name: Stable Release
 
 on:
   push:
     branches:
       - main
+  # Also allow manual triggering for stable releases
+  workflow_dispatch:
 
 env:
   node_version: 20
 
 jobs:
-  build:
+  stable-build:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
@@ -76,14 +78,30 @@ jobs:
         working-directory: ./dist
         run: zip -r ../module.zip ./*
 
-      # Update the 'latest' release
-      - name: Update Latest Release
+      # Update the 'latest' stable release
+      - name: Update Latest Stable Release
         id: create_latest_release
         uses: ncipollo/release-action@v1
         if: endsWith(github.ref, 'main')
         with:
           allowUpdates: true
-          name: Latest
+          name: "Latest Stable"
+          body: |
+            ## 🚀 Latest Stable Release
+
+            This is the most recent **stable release** of the AI Text Importer.
+            
+            ### ✅ Production Ready:
+            - Fully tested features
+            - Published to Foundry Hub
+            - Recommended for all users
+            
+            ### 📦 Installation:
+            1. Install directly from Foundry Hub (search "AI Text Importer")
+            2. Or use manifest URL: `https://github.com/${{github.repository}}/releases/latest/download/module.json`
+            
+            ### 🔧 For Testing/Development:
+            Check out our [alpha releases](https://github.com/${{github.repository}}/releases) for the latest features and bug fixes.
           draft: false
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -106,13 +124,27 @@ jobs:
         working-directory: ./dist
         run: zip -r ../module.zip ./*
 
-      # Create a release for this specific version
-      - name: Create Github Version Release
+      # Create a stable release for this specific version
+      - name: Create Stable Version Release
         id: create_version_release
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true # Allow updating existing releases to handle tag conflicts
-          name: Release ${{ steps.get-version.outputs.version }}
+          name: "Stable Release ${{ steps.get-version.outputs.version }}"
+          body: |
+            ## 🚀 Stable Release ${{ steps.get-version.outputs.version }}
+
+            This is a **stable production release** of the AI Text Importer.
+            
+            ### ✅ What's New:
+            See the [commit history](https://github.com/${{github.repository}}/commits/main) for detailed changes.
+            
+            ### 📦 Installation:
+            1. **Recommended**: Install from Foundry Hub (search "AI Text Importer")
+            2. **Manual**: Use manifest URL: `https://github.com/${{github.repository}}/releases/download/${{ steps.get-version.outputs.version }}/module.json`
+            
+            ### 🧪 Want the Latest Features?
+            Check out our [alpha releases](https://github.com/${{github.repository}}/releases?q=prerelease%3Atrue) for bleeding-edge features and bug fixes.
           draft: false
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
