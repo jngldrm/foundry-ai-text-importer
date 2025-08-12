@@ -2,6 +2,15 @@
 
 Import any monster stat block right into FoundryVTT using GPT!
 
+## 🧪 Alpha Testing Available
+
+This project now supports **alpha releases** for testing new features!
+
+- **🚀 Stable releases**: Available from Foundry Hub (recommended for production)
+- **🧪 Alpha releases**: Available as GitHub pre-releases (includes debug features)
+
+Alpha releases include enhanced console logging and debug features for troubleshooting item imports.
+
 *DnD5e and GPT-5 support only for now, more systems and LLMs to come!*
 
 ## Video Demo
