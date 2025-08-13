@@ -209,7 +209,7 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
   }
 
   get attackBonus(): Foundry5eItem['system']['attackBonus'] {
-    return '';
+    return this.magicalBonus ? this.magicalBonus.toString() : '';
   }
 
   get chatFlavor(): Foundry5eItem['system']['chatFlavor'] {
