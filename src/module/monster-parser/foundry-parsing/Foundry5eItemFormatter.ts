@@ -279,7 +279,7 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
       
       return {
         value: weaponType,
-        subtype: baseItem
+        baseItem: baseItem
       };
     }
     
@@ -289,13 +289,13 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
         
       return {
         value: equipmentType,
-        subtype: this.parsedItem.baseItem || ''
+        baseItem: this.parsedItem.baseItem || ''
       };
     }
     
     return {
       value: this.parsedItem.itemSubtype || '',
-      subtype: this.parsedItem.baseItem || ''
+      baseItem: this.parsedItem.baseItem || ''
     };
   }
 
@@ -726,7 +726,7 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
   }
 
   /**
-   * Generate base damage parts for weapon attacks (no special effects)
+   * Generate base damage parts for weapon attacks (includes ALL damage types)
    */
   private getBaseDamageParts(): Array<any> {
     console.log('🔍 DEBUG getBaseDamageParts:', {
@@ -742,25 +742,43 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
       return [];
     }
 
-    // Get only the first damage part (base weapon damage)
-    const [baseDamage, damageType] = this.parsedItem.damage.parts[0];
-    const baseFormula = this.magicalBonus ? `${baseDamage} + ${this.magicalBonus}` : baseDamage;
-    
-    return [
-      {
+    // Include ALL damage parts in the weapon attack
+    const damageParts = this.parsedItem.damage.parts.map(([damage, type], index) => {
+      // Apply magical bonus only to the first (base weapon) damage part
+      const shouldApplyMagicalBonus = index === 0 && this.magicalBonus;
+      
+      // Parse damage formula like "1d8" or "1d8 + @mod" into components
+      const damageMatch = damage.match(/(\d+)d(\d+)/);
+      const number = damageMatch ? parseInt(damageMatch[1]) : null;
+      const denomination = damageMatch ? parseInt(damageMatch[2]) : null;
+      
+      // Handle bonus part of damage formula
+      let bonus = '';
+      if (damage.includes('+ @mod')) {
+        bonus = shouldApplyMagicalBonus ? `@mod + ${this.magicalBonus}` : '@mod';
+      } else if (damage.includes('@mod')) {
+        bonus = shouldApplyMagicalBonus ? `@mod + ${this.magicalBonus}` : '@mod';  
+      } else if (shouldApplyMagicalBonus) {
+        bonus = this.magicalBonus.toString();
+      }
+      
+      return {
         custom: {
           enabled: false,
           formula: ''
         },
-        number: null,
-        denomination: null,
-        bonus: '',
-        types: [damageType],
+        number: number,
+        denomination: denomination,
+        bonus: bonus,
+        types: [type],
         scaling: {
           number: 1
         }
-      }
-    ];
+      };
+    });
+    
+    console.log('📊 Generated damage parts:', damageParts);
+    return damageParts;
   }
 
   /**

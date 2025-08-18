@@ -93,7 +93,7 @@ export const Foundry5eItemSchema = z.object({
       type: z
         .object({
           value: z.string(),
-          subtype: z.string(),
+          baseItem: z.string(),
         })
         .optional(),
       requirements: z.string().optional(),
