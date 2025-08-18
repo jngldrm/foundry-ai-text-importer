@@ -60,10 +60,12 @@ export const Foundry5eItemSchema = z.object({
         units: z.string(),
       }),
       uses: z.object({
-        value: z.number().nullable(),
         max: z.string().nullable(),
-        per: z.string().nullable(),
-        recovery: z.string(),
+        recovery: z.array(z.object({
+          period: z.string(),
+          type: z.string()
+        })),
+        spent: z.number()
       }),
       consume: z.object({
         type: z.string(),

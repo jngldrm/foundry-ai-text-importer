@@ -183,12 +183,38 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
 
   get uses(): Foundry5eItem['system']['uses'] {
     const parsedUses = this.parsedItem.uses;
+    
+    if (!parsedUses?.value) {
+      return {
+        max: null,
+        recovery: [],
+        spent: 0
+      };
+    }
+    
+    // Format recovery for Foundry v5
+    const recovery: Array<{period: string, type: string}> = [];
+    if (parsedUses.per === 'day') {
+      recovery.push({
+        period: 'day',
+        type: 'recoverAll'
+      });
+    } else if (parsedUses.per === 'shortRest') {
+      recovery.push({
+        period: 'sr',
+        type: 'recoverAll'
+      });
+    } else if (parsedUses.per === 'longRest') {
+      recovery.push({
+        period: 'lr',
+        type: 'recoverAll'
+      });
+    }
+    
     return {
-      value: parsedUses?.value || null,
-      // convert value to string
-      max: parsedUses?.value ? String(parsedUses.value) : null,
-      per: parsedUses?.per || null,
-      recovery: parsedUses?.recovery || '',
+      max: String(parsedUses.value),
+      recovery: recovery,
+      spent: 0
     };
   }
 
@@ -246,9 +272,14 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
       const weaponType = this.parsedItem.weaponType || 
         determineWeaponType(this.parsedItem.itemSubtype || '', this.parsedItem.name);
       
+      // Always use getBaseItem if baseItem is empty or undefined
+      const baseItem = this.parsedItem.baseItem && this.parsedItem.baseItem.trim() !== '' 
+        ? this.parsedItem.baseItem 
+        : getBaseItem(this.parsedItem.name);
+      
       return {
         value: weaponType,
-        subtype: this.parsedItem.baseItem || getBaseItem(this.parsedItem.name)
+        subtype: baseItem
       };
     }
     
@@ -324,8 +355,45 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
   }
 
   get properties(): string[] {
-    if (!this.parsedItem.properties) return [];
-    return mapWeaponProperties(this.parsedItem.properties);
+    const baseProperties = this.parsedItem.properties || [];
+    const mappedProperties = mapWeaponProperties(baseProperties);
+    
+    // Add "mgc" property for magical items
+    if (this.isMagicalItem() && !mappedProperties.includes('mgc')) {
+      mappedProperties.push('mgc');
+    }
+    
+    return mappedProperties;
+  }
+
+  /**
+   * Determine if this is a magical item
+   */
+  private isMagicalItem(): boolean {
+    // Check for magical bonus
+    if (this.parsedItem.magicalBonus && this.parsedItem.magicalBonus > 0) {
+      return true;
+    }
+    
+    // Check for rarity above common
+    if (this.parsedItem.rarity && ['uncommon', 'rare', 'veryRare', 'legendary', 'artifact'].includes(this.parsedItem.rarity)) {
+      return true;
+    }
+    
+    // Check for attunement requirement (only magic items require attunement)
+    if (this.parsedItem.attunement && this.parsedItem.attunement === 'required') {
+      return true;
+    }
+    
+    // Check for special abilities in description (very basic heuristic)
+    const description = this.parsedItem.description.toLowerCase();
+    if (description.includes('magic') || description.includes('magical') || 
+        description.includes('spell') || description.includes('enchant') ||
+        description.includes('bonus to attack') || description.includes('bonus to damage')) {
+      return true;
+    }
+    
+    return false;
   }
 
   get magicalBonus(): number | null {
@@ -363,86 +431,263 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
   get activities(): Record<string, any> {
     if (this.type !== 'weapon') return {};
 
-    // Generate a basic attack activity for weapons
+    const activities: Record<string, any> = {};
+    
+    // Always add the basic attack activity
+    activities['dnd5eactivity000'] = this.createAttackActivity();
+    
+    // Add save activity if item has save mechanics
+    if (this.parsedItem.save?.ability && this.parsedItem.save?.dc) {
+      activities['dnd5eactivity100'] = this.createSaveActivity();
+    }
+    
+    // Add utility activity if item has special uses
+    if (this.parsedItem.uses?.value && this.parsedItem.uses.value > 0) {
+      activities['dnd5eactivity300'] = this.createUtilityActivity();
+    }
+
+    return activities;
+  }
+
+  /**
+   * Create the basic weapon attack activity
+   */
+  private createAttackActivity(): any {
     return {
-      'dnd5eactivity000': {
-        _id: 'dnd5eactivity000',
-        type: 'attack',
-        activation: {
-          type: 'action',
-          value: 1,
-          condition: '',
-          override: false
+      _id: 'dnd5eactivity000',
+      type: 'attack',
+      activation: {
+        type: 'action',
+        value: 1,
+        condition: '',
+        override: false
+      },
+      consumption: {
+        targets: [],
+        scaling: {
+          allowed: false,
+          max: ''
         },
-        consumption: {
-          targets: [],
-          scaling: {
-            allowed: false,
-            max: ''
-          },
-          spellSlot: true
+        spellSlot: true
+      },
+      description: {
+        chatFlavor: ''
+      },
+      duration: {
+        concentration: false,
+        value: '',
+        units: 'inst',
+        special: '',
+        override: false
+      },
+      effects: [],
+      range: {
+        value: this.parsedItem.range?.value?.toString() || '5',
+        units: this.parsedItem.range?.units || 'ft',
+        special: '',
+        override: false
+      },
+      target: {
+        template: {
+          count: '',
+          contiguous: false,
+          type: '',
+          size: '',
+          width: '',
+          height: '',
+          units: ''
         },
-        description: {
-          chatFlavor: ''
+        affects: {
+          count: '',
+          type: '',
+          choice: false,
+          special: ''
         },
-        duration: {
-          concentration: false,
-          value: '',
-          units: 'inst',
-          special: '',
-          override: false
+        prompt: true,
+        override: false
+      },
+      attack: {
+        ability: '',
+        bonus: this.magicalBonus ? this.magicalBonus.toString() : '',
+        critical: {
+          threshold: null
         },
-        effects: [],
-        range: {
-          value: this.parsedItem.range?.value?.toString() || '5',
-          units: this.parsedItem.range?.units || 'ft',
-          special: '',
-          override: false
+        flat: false,
+        type: {
+          value: this.determineAttackType(),
+          classification: 'weapon'
+        }
+      },
+      damage: {
+        critical: {
+          bonus: ''
         },
-        target: {
-          template: {
-            count: '',
-            contiguous: false,
-            type: '',
-            size: '',
-            width: '',
-            height: '',
-            units: ''
-          },
-          affects: {
-            count: '',
-            type: '',
-            choice: false,
-            special: ''
-          },
-          prompt: true,
-          override: false
+        includeBase: true,
+        parts: this.getBaseDamageParts()
+      },
+      uses: {
+        spent: 0,
+        recovery: []
+      },
+      sort: 0
+    };
+  }
+
+  /**
+   * Create save activity for special effects
+   */
+  private createSaveActivity(): any {
+    return {
+      _id: 'dnd5eactivity100',
+      type: 'save',
+      activation: {
+        type: 'action',
+        value: 1,
+        condition: '',
+        override: false
+      },
+      consumption: {
+        targets: [],
+        scaling: {
+          allowed: false,
+          max: ''
         },
-        attack: {
-          ability: '',
-          bonus: this.magicalBonus ? this.magicalBonus.toString() : '',
-          critical: {
-            threshold: null
-          },
-          flat: false,
-          type: {
-            value: this.parsedItem.range?.value ? 'ranged' : 'melee',
-            classification: 'weapon'
+        spellSlot: true
+      },
+      description: {
+        chatFlavor: ''
+      },
+      duration: {
+        concentration: false,
+        value: '',
+        units: 'inst',
+        special: '',
+        override: false
+      },
+      effects: [],
+      range: {
+        value: this.parsedItem.range?.value?.toString() || '5',
+        units: this.parsedItem.range?.units || 'ft',
+        special: '',
+        override: false
+      },
+      target: {
+        template: {
+          count: '',
+          contiguous: false,
+          type: '',
+          size: '',
+          width: '',
+          height: '',
+          units: ''
+        },
+        affects: {
+          count: '',
+          type: '',
+          choice: false,
+          special: ''
+        },
+        prompt: true,
+        override: false
+      },
+      damage: {
+        onSave: 'half',
+        parts: this.getSaveDamageParts()
+      },
+      save: {
+        ability: [this.parsedItem.save?.ability || 'con'],
+        dc: {
+          calculation: '',
+          formula: this.parsedItem.save?.dc?.toString() || '15'
+        }
+      },
+      uses: {
+        spent: 0,
+        recovery: [],
+        max: ''
+      },
+      sort: 0,
+      name: ''
+    };
+  }
+
+  /**
+   * Create utility activity for special item uses
+   */
+  private createUtilityActivity(): any {
+    return {
+      _id: 'dnd5eactivity300',
+      type: 'utility',
+      activation: {
+        type: 'action',
+        value: 1,
+        condition: '',
+        override: false
+      },
+      consumption: {
+        targets: [
+          {
+            type: 'itemUses',
+            value: '1',
+            target: '',
+            scaling: {}
           }
+        ],
+        scaling: {
+          allowed: false,
+          max: ''
         },
-        damage: {
-          critical: {
-            bonus: ''
-          },
-          includeBase: true,
-          parts: this.getDamageParts()
+        spellSlot: true
+      },
+      description: {
+        chatFlavor: ''
+      },
+      duration: {
+        concentration: false,
+        value: '',
+        units: 'inst',
+        special: '',
+        override: false
+      },
+      effects: [],
+      range: {
+        value: this.parsedItem.range?.value?.toString() || '5',
+        units: this.parsedItem.range?.units || 'ft',
+        special: '',
+        override: false
+      },
+      target: {
+        template: {
+          count: '',
+          contiguous: false,
+          type: '',
+          size: '',
+          width: '',
+          height: '',
+          units: ''
         },
-        uses: {
-          spent: 0,
-          recovery: []
+        affects: {
+          count: '',
+          type: '',
+          choice: false,
+          special: ''
         },
-        sort: 0
-      }
+        prompt: true,
+        override: false
+      },
+      roll: {
+        formula: '',
+        name: '',
+        prompt: false,
+        visible: false
+      },
+      uses: {
+        spent: 0,
+        recovery: [],
+        max: ''
+      },
+      sort: 0,
+      name: this.getUtilityActivityName()
     };
   }
 
@@ -451,10 +696,40 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
   }
 
   /**
-   * Generate damage parts for activities, including magical bonuses
+   * Determine attack type based on weapon type and properties
    */
-  private getDamageParts(): Array<[string, string]> {
-    console.log('🔍 DEBUG getDamageParts:', {
+  private determineAttackType(): 'melee' | 'ranged' {
+    const weaponType = this.parsedItem.weaponType;
+    const weaponName = this.parsedItem.name.toLowerCase();
+    const properties = this.parsedItem.properties || [];
+    
+    // Check weapon type first
+    if (weaponType === 'simpleR' || weaponType === 'martialR') {
+      return 'ranged';
+    }
+    
+    // Check for explicitly ranged weapons by name
+    const rangedWeapons = ['bow', 'crossbow', 'sling', 'blowgun', 'dart'];
+    if (rangedWeapons.some(weapon => weaponName.includes(weapon))) {
+      return 'ranged';
+    }
+    
+    // Check if weapon has thrown property but isn't primarily ranged
+    if (properties.includes('thrown') || properties.includes('thr')) {
+      // Thrown weapons like daggers, javelins are still melee weapons when used in melee
+      // They can be thrown, but their primary attack is melee
+      return 'melee';
+    }
+    
+    // Default to melee for most weapons
+    return 'melee';
+  }
+
+  /**
+   * Generate base damage parts for weapon attacks (no special effects)
+   */
+  private getBaseDamageParts(): Array<any> {
+    console.log('🔍 DEBUG getBaseDamageParts:', {
       hasDamage: !!this.parsedItem.damage,
       hasParts: !!this.parsedItem.damage?.parts,
       partsLength: this.parsedItem.damage?.parts?.length || 0,
@@ -467,22 +742,79 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
       return [];
     }
 
-    // Start with the base damage parts
-    const damageParts: Array<[string, string]> = [...this.parsedItem.damage.parts];
+    // Get only the first damage part (base weapon damage)
+    const [baseDamage, damageType] = this.parsedItem.damage.parts[0];
+    const baseFormula = this.magicalBonus ? `${baseDamage} + ${this.magicalBonus}` : baseDamage;
     
-    // If there's a magical bonus, add it to the first damage part (base weapon damage)
-    if (this.magicalBonus && damageParts.length > 0) {
-      const [baseDamage, damageType] = damageParts[0];
-      // Add magical bonus to the base damage formula
-      const enhancedDamage = `${baseDamage} + ${this.magicalBonus}`;
-      damageParts[0] = [enhancedDamage, damageType];
-      console.log('✨ Applied magical bonus:', {
-        original: `${baseDamage} (${damageType})`,
-        enhanced: `${enhancedDamage} (${damageType})`
-      });
+    return [
+      {
+        custom: {
+          enabled: false,
+          formula: ''
+        },
+        number: null,
+        denomination: null,
+        bonus: '',
+        types: [damageType],
+        scaling: {
+          number: 1
+        }
+      }
+    ];
+  }
+
+  /**
+   * Generate damage parts for save effects (special abilities)
+   */
+  private getSaveDamageParts(): Array<any> {
+    if (!this.parsedItem.damage?.parts || this.parsedItem.damage.parts.length < 2) {
+      return [];
+    }
+
+    // Get special effect damage (typically the second damage part for items like Dagger of Venom)
+    const specialDamageParts = this.parsedItem.damage.parts.slice(1);
+    
+    return specialDamageParts.map(([damage, type]) => {
+      // Parse damage formula like "2d10" into number and denomination
+      const match = damage.match(/(\d+)d(\d+)/);
+      const number = match ? parseInt(match[1]) : 2;
+      const denomination = match ? parseInt(match[2]) : 10;
+      
+      return {
+        custom: {
+          enabled: false,
+          formula: ''
+        },
+        number: number,
+        denomination: denomination,
+        bonus: '',
+        types: [type],
+        scaling: {
+          number: 1
+        }
+      };
+    });
+  }
+
+  /**
+   * Get utility activity name based on item description
+   */
+  private getUtilityActivityName(): string {
+    const name = this.parsedItem.name.toLowerCase();
+    const description = this.parsedItem.description.toLowerCase();
+    
+    if (name.includes('venom') || description.includes('poison')) {
+      return 'Poison Blade';
     }
     
-    console.log('📊 Final damage parts:', damageParts);
-    return damageParts;
+    if (description.includes('fire') || description.includes('flame')) {
+      return 'Ignite';
+    }
+    
+    if (description.includes('light') || description.includes('illuminate')) {
+      return 'Illuminate';
+    }
+    
+    return 'Special Ability';
   }
 }

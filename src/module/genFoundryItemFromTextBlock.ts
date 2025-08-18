@@ -99,9 +99,9 @@ const parseItemDirectlyFromText = async (text: string): Promise<Parsed5eItem> =>
     2. **Physical Properties**: Extract weight, price, and rarity if mentioned
     3. **Weapon Properties**: For weapons, identify:
        - Weapon category (Simple/Martial, Melee/Ranged)
-       - Base weapon type (longsword, dagger, etc.)
+       - Base weapon type (longsword, dagger, etc.) - extract the core weapon name without magical modifiers
        - Properties (versatile, finesse, light, heavy, reach, thrown, two-handed, ammunition, loading, special)
-       - Damage dice and type
+       - Damage dice and type for the base weapon
        - Range (for ranged weapons)
     4. **Equipment Properties**: For armor/equipment, identify:
        - Armor class and type (light/medium/heavy armor, shield, clothing)
@@ -111,14 +111,26 @@ const parseItemDirectlyFromText = async (text: string): Promise<Parsed5eItem> =>
        - Attunement requirements
        - **Magical bonuses**: Look for phrases like "+1 bonus to attack and damage rolls", "gains a +2 bonus", "provides a +3 bonus" and extract the numerical value as magicalBonus
        - **Magical AC bonuses**: For armor, extract bonuses like "+1 AC" as armorClass.magicalBonus
-       - Special abilities and usage limitations
+       - **Special abilities and usage limitations**: Extract any special actions, activated abilities, or unique mechanics
     6. **Combat Mechanics**: Extract activation costs, duration, targets, saves, etc.
+    7. **Special Abilities**: Look for additional effects beyond basic weapon/armor function:
+       - Poison effects, elemental damage, conditions
+       - Saving throws (DC and ability)
+       - Usage limitations (per day, recharge, etc.)
+       - Secondary actions or utility effects
 
     EXAMPLES:
     - "Longsword" → itemType: "weapon", weaponType: "martialM", baseItem: "longsword", properties: ["versatile"]
     - "Dagger +1" with "+1 bonus to attack and damage rolls" → itemType: "weapon", weaponType: "simpleM", baseItem: "dagger", magicalBonus: 1, rarity: "uncommon"
+    - "Dagger of Venom" with poison ability → itemType: "weapon", weaponType: "simpleM", baseItem: "dagger", magicalBonus: 1, save: {ability: "con", dc: 15}, damage: {parts: [["1d4 + @mod", "piercing"], ["2d10", "poison"]]}, uses: {value: 1, per: "day"}
     - "Studded Leather Armor" → itemType: "equipment", equipmentType: "light", armorClass: {{value: 12, dex: 2}}
     - "Potion of Healing" → itemType: "consumable", rarity: "common"
+
+    **CRITICAL**: For items with special abilities like poison effects, elemental damage, or save-based effects:
+    1. Parse the save information (ability and DC) into the save field
+    2. Extract ALL damage types and formulas into damage.parts array
+    3. Identify usage limitations and put them in the uses field
+    4. Set actionType appropriately (e.g., "meleeWeaponAttack" for weapon attacks, "savingThrow" for save effects)
 
     SCHEMA AND FORMAT INSTRUCTIONS:
     {formatInstructions}
