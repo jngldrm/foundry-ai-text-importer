@@ -122,7 +122,7 @@ const parseItemDirectlyFromText = async (text: string): Promise<Parsed5eItem> =>
     EXAMPLES:
     - "Longsword" → itemType: "weapon", weaponType: "martialM", baseItem: "longsword", properties: ["versatile"]
     - "Dagger +1" with "+1 bonus to attack and damage rolls" → itemType: "weapon", weaponType: "simpleM", baseItem: "dagger", magicalBonus: 1, rarity: "uncommon"
-    - "Dagger of Venom" with poison ability → itemType: "weapon", weaponType: "simpleM", baseItem: "dagger", magicalBonus: 1, save: {ability: "con", dc: 15}, damage: {parts: [["1d4 + @mod", "piercing"], ["2d10", "poison"]]}, uses: {value: 1, per: "day"}
+    - "Dagger of Venom" with poison ability → itemType: "weapon", weaponType: "simpleM", baseItem: "dagger", magicalBonus: 1, save: {{ability: "con", dc: 15}}, damage: {{parts: [["1d4 + @mod", "piercing"], ["2d10", "poison"]]}}, uses: {{value: 1, per: "day"}}
     - "Studded Leather Armor" → itemType: "equipment", equipmentType: "light", armorClass: {{value: 12, dex: 2}}
     - "Potion of Healing" → itemType: "consumable", rarity: "common"
 
