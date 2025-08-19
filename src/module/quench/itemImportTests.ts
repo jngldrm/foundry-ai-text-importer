@@ -17,7 +17,7 @@ const registerItemImportTests = (context) => {
       const item = await genFoundry5eItemFromTextBlock(weaponText);
       assert.ok(item.name.includes('Flaming') || item.name.includes('Longsword'));
       assert.ok(item.type === 'weapon' || item.type === 'feat');
-      assert.ok(item.system.damage?.parts?.length > 0);
+      assert.ok(item.system.damage?.base?.types?.length > 0);
     });
 
     it('Can parse a magic item from text', async function () {
