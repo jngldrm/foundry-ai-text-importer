@@ -250,7 +250,102 @@ export default class Foundry5eItemFormatter implements Foundry5eItem {
   }
 
   get damage(): Foundry5eItem['system']['damage'] {
-    return this.parsedItem.damage;
+    if (!this.parsedItem.damage?.parts || this.parsedItem.damage.parts.length === 0) {
+      return {
+        versatile: {
+          number: null,
+          denomination: null,
+          bonus: "",
+          types: [],
+          custom: {
+            enabled: false,
+            formula: ""
+          },
+          scaling: {
+            mode: "",
+            number: null,
+            formula: ""
+          }
+        },
+        base: {
+          number: null,
+          denomination: null,
+          bonus: "",
+          types: [],
+          custom: {
+            enabled: false,
+            formula: ""
+          },
+          scaling: {
+            mode: "",
+            number: null,
+            formula: ""
+          }
+        }
+      };
+    }
+
+    // Get the first (base) damage part for the base damage
+    const [baseDamage, baseType] = this.parsedItem.damage.parts[0];
+    
+    // Parse damage formula like "1d8" or "1d8 + @mod" 
+    const damageMatch = baseDamage.match(/(\d+)d(\d+)/);
+    const baseNumber = damageMatch ? parseInt(damageMatch[1]) : null;
+    const baseDenomination = damageMatch ? parseInt(damageMatch[2]) : null;
+    
+    // Handle bonus in base damage (usually @mod)
+    let baseBonus = "";
+    if (baseDamage.includes("@mod")) {
+      baseBonus = "@mod";
+    }
+
+    // Handle versatile damage if present
+    const versatileDamage = this.parsedItem.damage.versatile;
+    let versatileNumber: number | null = null;
+    let versatileDenomination: number | null = null;
+    let versatileBonus = "";
+    
+    if (versatileDamage) {
+      const versatileMatch = versatileDamage.match(/(\d+)d(\d+)/);
+      versatileNumber = versatileMatch ? parseInt(versatileMatch[1]) : null;
+      versatileDenomination = versatileMatch ? parseInt(versatileMatch[2]) : null;
+      if (versatileDamage.includes("@mod")) {
+        versatileBonus = "@mod";
+      }
+    }
+
+    return {
+      versatile: {
+        number: versatileNumber,
+        denomination: versatileDenomination,
+        bonus: versatileBonus,
+        types: versatileDamage ? [baseType] : [],
+        custom: {
+          enabled: false,
+          formula: ""
+        },
+        scaling: {
+          mode: "",
+          number: null,
+          formula: ""
+        }
+      },
+      base: {
+        number: baseNumber,
+        denomination: baseDenomination,
+        bonus: baseBonus,
+        types: [baseType],
+        custom: {
+          enabled: false,
+          formula: ""
+        },
+        scaling: {
+          mode: "",
+          number: null,
+          formula: ""
+        }
+      }
+    };
   }
 
   get formula(): Foundry5eItem['system']['formula'] {

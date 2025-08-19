@@ -81,8 +81,36 @@ export const Foundry5eItemSchema = z.object({
         damage: z.string().default(''),
       }),
       damage: z.object({
-        parts: z.array(z.tuple([z.string(), z.string()])),
-        versatile: z.string(),
+        versatile: z.object({
+          number: z.number().nullable(),
+          denomination: z.number().nullable(),
+          bonus: z.string(),
+          types: z.array(z.string()),
+          custom: z.object({
+            enabled: z.boolean(),
+            formula: z.string()
+          }),
+          scaling: z.object({
+            mode: z.string(),
+            number: z.number().nullable(),
+            formula: z.string()
+          })
+        }),
+        base: z.object({
+          number: z.number().nullable(),
+          denomination: z.number().nullable(),
+          bonus: z.string(),
+          types: z.array(z.string()),
+          custom: z.object({
+            enabled: z.boolean(),
+            formula: z.string()
+          }),
+          scaling: z.object({
+            mode: z.string(),
+            number: z.number().nullable(),
+            formula: z.string()
+          })
+        })
       }),
       formula: z.string(),
       save: z.object({
